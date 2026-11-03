@@ -1,9 +1,10 @@
 # Data files
 /data/
-!dashboard/data/
 *.csv
 *.jsonl
 *.parquet
+!dashboard/data/
+!dashboard/data/**
 
 # Python
 __pycache__/

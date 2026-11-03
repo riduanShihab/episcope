@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EpiScope — Disease Surveillance Dashboard</title>
+    <meta name="description" content="EpiScope: Big Data Surveillance, Forecasting and Response-Planning Platform for Bangladesh">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/topojson.v3.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0f1419;
+            --bg-secondary: #1a1f2e;
+            --bg-card: #1e2538;
+            --bg-hover: #252d40;
+            --text-primary: #e8eaed;
+            --text-secondary: #9aa0a6;
+            --text-muted: #5f6368;
+            --accent-blue: #4fc3f7;
+            --accent-green: #66bb6a;
+            --accent-amber: #ffa726;
+            --accent-red: #ef5350;
+            --accent-purple: #ab47bc;
+            --border: #2d3548;
+            --dengue: #ef5350;
+            --diarrhoea: #4fc3f7;
+            --influenza: #66bb6a;
+            --malaria: #ffa726;
+            --alert-glow: rgba(239, 83, 80, 0.3);
+            --radius: 8px;
+            --shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        /* ── Header ── */
+        .header {
+            background: linear-gradient(135deg, var(--bg-secondary), var(--bg-card));
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header h1 {
+            font-size: 20px;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header-meta {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        .header-meta .freshness {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .freshness-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* ── Controls ── */
+        .controls {
+            display: flex;
+            gap: 12px;
+            padding: 12px 24px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .control-group label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        select, input[type=range] {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 6px 10px;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+        }
+        select:focus { outline: 1px solid var(--accent-blue); }
+
+        /* ── Grid Layout ── */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto auto;
+            gap: 16px;
+            padding: 16px 24px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+            box-shadow: var(--shadow);
+            transition: border-color 0.2s;
+        }
+        .card:hover {
+            border-color: var(--accent-blue);
+        }
+        .card-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card-title .badge {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+        .card-title .badge-alert {
+            background: rgba(239, 83, 80, 0.2);
+            color: var(--accent-red);
+        }
+        .card.full-width {
+            grid-column: 1 / -1;
+        }
+
+        /* ── Map ── */
+        #map-container { position: relative; }
+        .district-path {
+            stroke: var(--bg-primary);
+            stroke-width: 0.5;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .district-path:hover { opacity: 0.8; stroke-width: 1.5; stroke: var(--text-primary); }
+        .district-path.selected { stroke: var(--accent-blue); stroke-width: 2; }
+        .alert-marker {
+            fill: var(--accent-red);
+            stroke: var(--bg-primary);
+            stroke-width: 1;
+            animation: alertPulse 1.5s infinite;
+        }
+        @keyframes alertPulse {
+            0%, 100% { r: 5; opacity: 1; }
+            50% { r: 8; opacity: 0.6; }
+        }
+        .map-legend {
+            position: absolute;
+            bottom: 8px;
+            left: 8px;
+            font-size: 11px;
+            background: rgba(15, 20, 25, 0.85);
+            padding: 8px;
+            border-radius: 4px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin: 2px 0;
+        }
+        .legend-swatch {
+            width: 14px;
+            height: 10px;
+            border-radius: 2px;
+        }
+
+        /* ── Time series ── */
+        .ts-line { fill: none; stroke-width: 2; }
+        .ts-area { opacity: 0.15; }
+        .ts-threshold { stroke-dasharray: 4 3; stroke-width: 1; }
+        .brush .selection { fill: var(--accent-blue); fill-opacity: 0.15; stroke: var(--accent-blue); }
+
+        /* ── Heatmap ── */
+        .heatmap-cell {
+            stroke: var(--bg-card);
+            stroke-width: 0.5;
+            cursor: pointer;
+        }
+        .heatmap-cell:hover { stroke: var(--text-primary); stroke-width: 1.5; }
+
+        /* ── Table ── */
+        .alert-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .alert-table th {
+            text-align: left;
+            padding: 8px;
+            border-bottom: 2px solid var(--border);
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+        .alert-table td {
+            padding: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+        .alert-table tr {
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .alert-table tr:hover { background: var(--bg-hover); }
+        .alert-table tr.selected { background: rgba(79, 195, 247, 0.1); }
+        .severity-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+        }
+
+        /* ── Allocation bars ── */
+        .alloc-bar-bg {
+            fill: rgba(255,255,255,0.05);
+            rx: 3;
+        }
+        .alloc-bar-stock { rx: 3; }
+        .alloc-bar-alloc { rx: 3; opacity: 0.7; }
+
+        /* ── Tooltip ── */
+        .tooltip {
+            position: absolute;
+            pointer-events: none;
+            background: rgba(15, 20, 25, 0.95);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 10px 14px;
+            font-size: 12px;
+            line-height: 1.5;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            z-index: 200;
+            max-width: 280px;
+            opacity: 0;
+            transition: opacity 0.15s;
+        }
+        .tooltip.visible { opacity: 1; }
+        .tooltip .tt-title { font-weight: 600; color: var(--accent-blue); margin-bottom: 4px; }
+        .tooltip .tt-row { display: flex; justify-content: space-between; gap: 16px; }
+        .tooltip .tt-label { color: var(--text-secondary); }
+        .tooltip .tt-value { font-weight: 500; }
+        .tt-suppressed { color: var(--text-muted); font-style: italic; }
+
+        /* ── Responsive ── */
+        @media (max-width: 1000px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <h1>🔬 EpiScope — Disease Surveillance Dashboard</h1>
+        <div class="header-meta">
+            <span>Bangladesh | 64 Districts</span>
+            <div class="freshness">
+                <span class="freshness-dot"></span>
+                <span id="freshness-ts">Data as of: loading...</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Controls -->
+    <div class="controls">
+        <div class="control-group">
+            <label>Disease</label>
+            <select id="sel-disease">
+                <option value="all">All diseases</option>
+                <option value="dengue" selected>Dengue</option>
+                <option value="diarrhoea">Diarrhoea</option>
+                <option value="influenza">Influenza</option>
+                <option value="malaria">Malaria</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <label>Year</label>
+            <select id="sel-year">
+                <option value="all">All years</option>
+                <option value="2021">2021</option>
+                <option value="2022">2022</option>
+                <option value="2023">2023</option>
+                <option value="2024">2024</option>
+                <option value="2025" selected>2025</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <label>District</label>
+            <select id="sel-district">
+                <option value="all" selected>All districts</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Dashboard Grid -->
+    <div class="dashboard-grid">
+        <!-- View 1: Choropleth Map -->
+        <div class="card" id="map-container">
+            <div class="card-title">
+                District Incidence Map
+                <span class="badge badge-alert" id="alert-count-badge">0 alerts</span>
+            </div>
+            <div id="map-viz"></div>
+        </div>
+
+        <!-- View 2: Time Series -->
+        <div class="card">
+            <div class="card-title">Case Trend & Forecast</div>
+            <div id="timeseries-viz"></div>
+        </div>
+
+        <!-- View 3: Seasonal Heatmap -->
+        <div class="card">
+            <div class="card-title">Seasonal Heatmap (Epi-week × Year)</div>
+            <div id="heatmap-viz"></div>
+        </div>
+
+        <!-- View 4: Allocation -->
+        <div class="card">
+            <div class="card-title">Resource Allocation</div>
+            <div id="allocation-viz"></div>
+        </div>
+
+        <!-- View 5: Alert Table -->
+        <div class="card full-width">
+            <div class="card-title">
+                Early Warning Alerts
+                <span style="font-size:11px; color:var(--text-muted)">Ranked by severity</span>
+            </div>
+            <div id="alert-table-viz"></div>
+        </div>
+    </div>
+
+    <!-- Tooltip -->
+    <div class="tooltip" id="tooltip"></div>
+
+    <script>
+    // ════════════════════════════════════════════════════════
+    // EpiScope D3.js Dashboard — Main Application
+    // ════════════════════════════════════════════════════════
+
+    const DISEASE_COLORS = {
+        dengue: "#ef5350",
+        diarrhoea: "#4fc3f7",
+        influenza: "#66bb6a",
+        malaria: "#ffa726",
+    };
+
+    // Colour-blind-safe palette (VIS-6)
+    const CB_SAFE = ["#4477AA", "#EE6677", "#228833", "#CCBB44", "#66CCEE", "#AA3377"];
+
+    // ── State ──
+    let state = {
+        disease: "dengue",
+        year: "2025",
+        district: "all",
+        data: {},
+    };
+
+    // ── Tooltip ──
+    const tooltip = d3.select("#tooltip");
+
+    function showTooltip(html, event) {
+        tooltip.html(html)
+            .style("left", (event.pageX + 15) + "px")
+            .style("top", (event.pageY - 10) + "px")
+            .classed("visible", true);
+    }
+    function hideTooltip() {
+        tooltip.classed("visible", false);
+    }
+
+    // ── Data Loading ──
+    async function loadData() {
+        const base = "data/";
+        const fallbackBase = "../data/serving/";
+        try {
+            const [ts, alerts, forecasts, allocation, districts] = await Promise.all([
+                d3.json(base + "timeseries.json").catch(() => d3.json(fallbackBase + "timeseries.json")).catch(() => []),
+                d3.json(base + "alerts.json").catch(() => d3.json(fallbackBase + "alerts.json")).catch(() => []),
+                d3.json(base + "forecasts.json").catch(() => d3.json(fallbackBase + "forecasts.json")).catch(() => []),
+                d3.json(base + "allocation.json").catch(() => d3.json(fallbackBase + "allocation.json")).catch(() => []),
+                d3.json(base + "districts.json").catch(() => d3.json(fallbackBase + "districts.json")).catch(() => []),
+            ]);
+
+            state.data = { ts, alerts, forecasts, allocation, districts };
+
+            // Populate district selector
+            const districtNames = [...new Set(districts.map(d => d.district))].sort();
+            const sel = d3.select("#sel-district");
+            districtNames.forEach(d => {
+                sel.append("option").attr("value", d).text(d);
+            });
+
+            // Set freshness (VIS-6)
+            document.getElementById("freshness-ts").textContent =
+                `Data as of: ${new Date().toISOString().slice(0, 16)}`;
+
+            renderAll();
+        } catch (e) {
+            console.error("Data loading error:", e);
+            document.getElementById("map-viz").innerHTML =
+                '<p style="color:var(--accent-amber);padding:20px">⚠ Could not load data. Run the pipeline first: <code>python run_all.py</code></p>';
+        }
+    }
+
+    // ── Filter data by current state ──
+    function filterTS(data) {
+        let filtered = data;
+        if (state.disease !== "all") filtered = filtered.filter(d => d.disease === state.disease);
+        if (state.year !== "all") filtered = filtered.filter(d => String(d.epi_year) === state.year);
+        if (state.district !== "all") filtered = filtered.filter(d => d.district === state.district);
+        return filtered;
+    }
+
+    // ════════════════════════════════════════════════════════
+    // VIEW 1: Choropleth Map
+    // ════════════════════════════════════════════════════════
+    function renderMap() {
+        const container = d3.select("#map-viz");
+        container.selectAll("*").remove();
+
+        const width = container.node().getBoundingClientRect().width;
+        const height = 380;
+
+        const svg = container.append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("role", "img")
+            .attr("aria-label", "District incidence choropleth map of Bangladesh");
+
+        // Aggregate incidence by district
+        const tsFiltered = filterTS(state.data.ts);
+        const districtAgg = d3.rollup(tsFiltered,
+            v => d3.sum(v, d => d.case_count || 0),
+            d => d.district
+        );
+
+        // Active alerts
+        const alertDistricts = new Set();
+        if (state.data.alerts) {
+            state.data.alerts
+                .filter(a => state.disease === "all" || a.disease === state.disease)
+                .filter(a => state.year === "all" || String(a.epi_year) === state.year)
+                .forEach(a => alertDistricts.add(a.district));
+        }
+
+        d3.select("#alert-count-badge").text(`${alertDistricts.size} alerts`);
+
+        // Color scale
+        const maxVal = d3.max([...districtAgg.values()]) || 1;
+        const colorScale = d3.scaleSequential(d3.interpolateYlOrRd).domain([0, maxVal]);
+
+        // Since we don't have actual TopoJSON, render as a grid map
+        const districts = state.data.districts || [];
+        const divisions = [...new Set(districts.map(d => d.division))];
+
+        const cellW = Math.min(50, (width - 40) / 12);
+        const cellH = 35;
+        const cols = Math.floor((width - 40) / cellW);
+
+        districts.forEach((d, i) => {
+            const row = Math.floor(i / cols);
+            const col = i % cols;
+            const x = 20 + col * cellW;
+            const y = 20 + row * cellH;
+            const val = districtAgg.get(d.district) || 0;
+            const isAlert = alertDistricts.has(d.district);
+
+            const g = svg.append("g").attr("class", "district-cell");
+
+            // Rectangle
+            g.append("rect")
+                .attr("x", x).attr("y", y)
+                .attr("width", cellW - 2).attr("height", cellH - 2)
+                .attr("rx", 3)
+                .attr("fill", val > 0 ? colorScale(val) : "#1a1f2e")
+                .attr("stroke", state.district === d.district ? "#4fc3f7" : (isAlert ? "#ef5350" : "#2d3548"))
+                .attr("stroke-width", state.district === d.district ? 2 : (isAlert ? 1.5 : 0.5))
+                .attr("class", "district-path")
+                .style("cursor", "pointer")
+                .on("mouseover", (event) => {
+                    const suppressed = val >= 1 && val < 5;
+                    showTooltip(`
+                        <div class="tt-title">${d.district}</div>
+                        <div class="tt-row"><span class="tt-label">Division:</span><span class="tt-value">${d.division}</span></div>
+                        <div class="tt-row"><span class="tt-label">Cases:</span><span class="tt-value">${suppressed ? '<span class="tt-suppressed">suppressed</span>' : val.toLocaleString()}</span></div>
+                        <div class="tt-row"><span class="tt-label">Alert:</span><span class="tt-value" style="color:${isAlert ? '#ef5350' : '#66bb6a'}">${isAlert ? '⚠ Active' : 'None'}</span></div>
+                    `, event);
+                })
+                .on("mouseout", hideTooltip)
+                .on("click", () => {
+                    state.district = state.district === d.district ? "all" : d.district;
+                    d3.select("#sel-district").property("value", state.district);
+                    renderAll();
+                });
+
+            // Label
+            g.append("text")
+                .attr("x", x + (cellW - 2) / 2).attr("y", y + (cellH - 2) / 2 + 1)
+                .attr("text-anchor", "middle").attr("dominant-baseline", "middle")
+                .attr("font-size", "8px").attr("fill", val > maxVal * 0.6 ? "#000" : "#ccc")
+                .text(d.district.slice(0, 4));
+
+            // Alert marker
+            if (isAlert) {
+                g.append("circle")
+                    .attr("cx", x + cellW - 6).attr("cy", y + 6)
+                    .attr("class", "alert-marker");
+            }
+        });
+
+        // Legend
+        const legendW = 120;
+        const legendH = 12;
+        const legendX = width - legendW - 20;
+        const legendY = height - 30;
+        const legendScale = d3.scaleLinear().domain([0, maxVal]).range([0, legendW]);
+
+        const defs = svg.append("defs");
+        const grad = defs.append("linearGradient").attr("id", "map-legend-grad");
+        [0, 0.25, 0.5, 0.75, 1].forEach(t => {
+            grad.append("stop")
+                .attr("offset", `${t * 100}%`)
+                .attr("stop-color", colorScale(t * maxVal));
+        });
+
+        svg.append("rect").attr("x", legendX).attr("y", legendY)
+            .attr("width", legendW).attr("height", legendH)
+            .attr("fill", "url(#map-legend-grad)").attr("rx", 2);
+
+        svg.append("text").attr("x", legendX).attr("y", legendY - 4)
+            .attr("font-size", "10px").attr("fill", "#9aa0a6").text("0");
+        svg.append("text").attr("x", legendX + legendW).attr("y", legendY - 4)
+            .attr("text-anchor", "end")
+            .attr("font-size", "10px").attr("fill", "#9aa0a6").text(maxVal.toLocaleString());
+        svg.append("text").attr("x", legendX + legendW / 2).attr("y", legendY + legendH + 12)
+            .attr("text-anchor", "middle")
+            .attr("font-size", "10px").attr("fill", "#9aa0a6").text("Total cases");
+    }
+
+    // ════════════════════════════════════════════════════════
+    // VIEW 2: Time Series with Forecast
+    // ════════════════════════════════════════════════════════
+    function renderTimeSeries() {
+        const container = d3.select("#timeseries-viz");
+        container.selectAll("*").remove();
+
+        const margin = { top: 20, right: 30, bottom: 40, left: 50 };
+        const width = container.node().getBoundingClientRect().width - margin.left - margin.right;
+        const height = 320 - margin.top - margin.bottom;
+
+        const svg = container.append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        // Aggregate time series
+        let tsData = filterTS(state.data.ts);
+        const weekly = d3.rollups(tsData,
+            v => ({
+                cases: d3.sum(v, d => d.case_count || 0),
+                admissions: d3.sum(v, d => d.admissions || 0),
+            }),
+            d => `${d.epi_year}-${String(d.epi_week).padStart(2, '0')}`
+        ).map(([key, val]) => ({
+            week: key,
+            cases: val.cases,
+            admissions: val.admissions,
+        })).sort((a, b) => a.week.localeCompare(b.week));
+
+        if (weekly.length === 0) {
+            svg.append("text").attr("x", width / 2).attr("y", height / 2)
+                .attr("text-anchor", "middle").attr("fill", "#9aa0a6")
+                .text("No data for current selection");
+            return;
+        }
+
+        // Scales
+        const x = d3.scaleBand().domain(weekly.map(d => d.week)).range([0, width]).padding(0.1);
+        const y = d3.scaleLinear().domain([0, d3.max(weekly, d => d.cases) * 1.2]).range([height, 0]);
+
+        // Axes
+        const tickInterval = Math.max(1, Math.floor(weekly.length / 10));
+        svg.append("g")
+            .attr("transform", `translate(0,${height})`)
+            .call(d3.axisBottom(x).tickValues(weekly.filter((_, i) => i % tickInterval === 0).map(d => d.week)))
+            .selectAll("text")
+            .attr("transform", "rotate(-45)")
+            .attr("text-anchor", "end")
+            .attr("font-size", "9px")
+            .attr("fill", "#9aa0a6");
+
+        svg.append("g")
+            .call(d3.axisLeft(y).ticks(5).tickFormat(d3.format(",d")))
+            .selectAll("text").attr("fill", "#9aa0a6");
+
+        // Y-axis label
+        svg.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", -40).attr("x", -height / 2)
+            .attr("text-anchor", "middle")
+            .attr("font-size", "11px").attr("fill", "#9aa0a6")
+            .text("Weekly Cases");
+
+        // Area chart
+        const area = d3.area()
+            .x(d => x(d.week) + x.bandwidth() / 2)
+            .y0(height)
+            .y1(d => y(d.cases))
+            .curve(d3.curveMonotoneX);
+
+        const diseaseColor = DISEASE_COLORS[state.disease] || "#4fc3f7";
+
+        svg.append("path")
+            .datum(weekly)
+            .attr("d", area)
+            .attr("fill", diseaseColor)
+            .attr("class", "ts-area");
+
+        // Line
+        const line = d3.line()
+            .x(d => x(d.week) + x.bandwidth() / 2)
+            .y(d => y(d.cases))
+            .curve(d3.curveMonotoneX);
+
+        svg.append("path")
+            .datum(weekly)
+            .attr("d", line)
+            .attr("stroke", diseaseColor)
+            .attr("class", "ts-line");
+
+        // Forecast overlay
+        const fcData = (state.data.forecasts || [])
+            .filter(f => state.disease === "all" || f.disease === state.disease)
+            .filter(f => state.district === "all" || f.district === state.district);
+
+        if (fcData.length > 0) {
+            const fcAgg = d3.rollups(fcData,
+                v => ({
+                    point: d3.sum(v, d => d.point_forecast || 0),
+                    lower: d3.sum(v, d => d.lower_80 || 0),
+                    upper: d3.sum(v, d => d.upper_80 || 0),
+                }),
+                d => `${d.forecast_year}-${String(d.forecast_week).padStart(2, '0')}`
+            ).map(([key, val]) => ({ week: key, ...val })).sort((a, b) => a.week.localeCompare(b.week));
+
+            // Prediction band (VIS-6: uncertainty always shown)
+            const fcArea = d3.area()
+                .x(d => {
+                    const xPos = x(d.week);
+                    return xPos !== undefined ? xPos + x.bandwidth() / 2 : width;
+                })
+                .y0(d => y(d.lower))
+                .y1(d => y(d.upper))
+                .curve(d3.curveMonotoneX);
+
+            svg.append("path")
+                .datum(fcAgg.filter(d => x(d.week) !== undefined))
+                .attr("d", fcArea)
+                .attr("fill", diseaseColor)
+                .attr("opacity", 0.1);
+
+            // Forecast line (dashed)
+            const fcLine = d3.line()
+                .x(d => {
+                    const xPos = x(d.week);
+                    return xPos !== undefined ? xPos + x.bandwidth() / 2 : width;
+                })
+                .y(d => y(d.point))
+                .curve(d3.curveMonotoneX);
+
+            svg.append("path")
+                .datum(fcAgg.filter(d => x(d.week) !== undefined))
+                .attr("d", fcLine)
+                .attr("stroke", diseaseColor)
+                .attr("stroke-dasharray", "6 3")
+                .attr("stroke-width", 2)
+                .attr("fill", "none");
+
+            // Forecast label
+            svg.append("text")
+                .attr("x", width - 5).attr("y", 15)
+                .attr("text-anchor", "end")
+                .attr("font-size", "10px").attr("fill", diseaseColor)
+                .text("--- Forecast (80% PI)");
+        }
+
+        // Hover dots
+        svg.selectAll(".ts-dot")
+            .data(weekly)
+            .join("circle")
+            .attr("cx", d => x(d.week) + x.bandwidth() / 2)
+            .attr("cy", d => y(d.cases))
+            .attr("r", 3)
+            .attr("fill", diseaseColor)
+            .attr("opacity", 0)
+            .on("mouseover", (event, d) => {
+                d3.select(event.target).attr("opacity", 1).attr("r", 5);
+                showTooltip(`
+                    <div class="tt-title">Week ${d.week}</div>
+                    <div class="tt-row"><span class="tt-label">Cases:</span><span class="tt-value">${d.cases.toLocaleString()}</span></div>
+                    <div class="tt-row"><span class="tt-label">Admissions:</span><span class="tt-value">${d.admissions.toLocaleString()}</span></div>
+                `, event);
+            })
+            .on("mouseout", (event) => {
+                d3.select(event.target).attr("opacity", 0).attr("r", 3);
+                hideTooltip();
+            });
+    }
+
+    // ════════════════════════════════════════════════════════
+    // VIEW 3: Seasonal Heatmap
+    // ════════════════════════════════════════════════════════
+    function renderHeatmap() {
+        const container = d3.select("#heatmap-viz");
+        container.selectAll("*").remove();
+
+        const margin = { top: 30, right: 20, bottom: 30, left: 50 };
+        const width = container.node().getBoundingClientRect().width - margin.left - margin.right;
+        const height = 280 - margin.top - margin.bottom;
+
+        const svg = container.append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        // Pivot: epi_week × epi_year
+        let tsData = state.data.ts || [];
+        if (state.disease !== "all") tsData = tsData.filter(d => d.disease === state.disease);
+        if (state.district !== "all") tsData = tsData.filter(d => d.district === state.district);
+
+        const heatData = d3.rollups(tsData,
+            v => d3.sum(v, d => d.case_count || 0),
+            d => d.epi_year,
+            d => d.epi_week
+        );
+
+        const years = [...new Set(tsData.map(d => d.epi_year))].sort();
+        const weeks = d3.range(1, 53);
+
+        const x = d3.scaleBand().domain(weeks).range([0, width]).padding(0.05);
+        const y = d3.scaleBand().domain(years).range([0, height]).padding(0.05);
+
+        const allVals = heatData.flatMap(([yr, wks]) => wks.map(([wk, val]) => val));
+        const maxVal = d3.max(allVals) || 1;
+        const color = d3.scaleSequential(d3.interpolateYlOrRd).domain([0, maxVal]);
+
+        // X axis
+        svg.append("g")
+            .attr("transform", `translate(0,${height})`)
+            .call(d3.axisBottom(x).tickValues(weeks.filter(w => w % 4 === 1)).tickFormat(d => `W${d}`))
+            .selectAll("text").attr("font-size", "9px").attr("fill", "#9aa0a6");
+
+        // Y axis
+        svg.append("g")
+            .call(d3.axisLeft(y))
+            .selectAll("text").attr("font-size", "10px").attr("fill", "#9aa0a6");
+
+        // Cells
+        const yearMap = new Map(heatData.map(([yr, wks]) => [yr, new Map(wks)]));
+
+        years.forEach(yr => {
+            weeks.forEach(wk => {
+                const val = yearMap.get(yr)?.get(wk) || 0;
+                svg.append("rect")
+                    .attr("x", x(wk)).attr("y", y(yr))
+                    .attr("width", x.bandwidth()).attr("height", y.bandwidth())
+                    .attr("fill", val > 0 ? color(val) : "#1a1f2e")
+                    .attr("class", "heatmap-cell")
+                    .on("mouseover", (event) => {
+                        showTooltip(`
+                            <div class="tt-title">${yr} Week ${wk}</div>
+                            <div class="tt-row"><span class="tt-label">Cases:</span><span class="tt-value">${val > 0 && val < 5 ? '<span class="tt-suppressed">suppressed</span>' : val.toLocaleString()}</span></div>
+                        `, event);
+                    })
+                    .on("mouseout", hideTooltip)
+                    .on("click", () => {
+                        state.year = String(yr);
+                        d3.select("#sel-year").property("value", state.year);
+                        renderAll();
+                    });
+            });
+        });
+
+        // X label
+        svg.append("text")
+            .attr("x", width / 2).attr("y", height + 28)
+            .attr("text-anchor", "middle").attr("font-size", "10px").attr("fill", "#9aa0a6")
+            .text("Epidemiological Week");
+    }
+
+    // ════════════════════════════════════════════════════════
+    // VIEW 4: Allocation
+    // ════════════════════════════════════════════════════════
+    function renderAllocation() {
+        const container = d3.select("#allocation-viz");
+        container.selectAll("*").remove();
+
+        const margin = { top: 20, right: 20, bottom: 30, left: 100 };
+        const width = container.node().getBoundingClientRect().width - margin.left - margin.right;
+        const height = 300 - margin.top - margin.bottom;
+
+        const svg = container.append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        const allocData = state.data.allocation || [];
+        if (allocData.length === 0) {
+            svg.append("text").attr("x", width / 2).attr("y", height / 2)
+                .attr("text-anchor", "middle").attr("fill", "#9aa0a6")
+                .text("No allocation data. Run optimiser.");
+            return;
+        }
+
+        // Filter by selected district or show top 15
+        let filtered = allocData;
+        if (state.district !== "all") {
+            filtered = allocData.filter(d => d.district === state.district);
+        }
+
+        // Aggregate by district
+        const districtAgg = d3.rollups(filtered,
+            v => ({
+                allocated: d3.sum(v, d => d.allocated || 0),
+                unmet: d3.sum(v, d => d.unmet || 0),
+            }),
+            d => d.district
+        ).sort((a, b) => b[1].unmet - a[1].unmet).slice(0, 15);
+
+        const y = d3.scaleBand()
+            .domain(districtAgg.map(d => d[0]))
+            .range([0, height])
+            .padding(0.2);
+
+        const maxVal = d3.max(districtAgg, d => d[1].allocated + d[1].unmet) || 1;
+        const x = d3.scaleLinear().domain([0, maxVal]).range([0, width]);
+
+        svg.append("g")
+            .call(d3.axisLeft(y))
+            .selectAll("text").attr("font-size", "10px").attr("fill", "#9aa0a6");
+
+        svg.append("g")
+            .attr("transform", `translate(0,${height})`)
+            .call(d3.axisBottom(x).ticks(5).tickFormat(d3.format(",.0f")))
+            .selectAll("text").attr("font-size", "9px").attr("fill", "#9aa0a6");
+
+        districtAgg.forEach(([district, vals]) => {
+            const yPos = y(district);
+            const barH = y.bandwidth();
+
+            // Allocated (green)
+            svg.append("rect")
+                .attr("x", 0).attr("y", yPos)
+                .attr("width", x(vals.allocated)).attr("height", barH)
+                .attr("fill", "#66bb6a").attr("rx", 3)
+                .on("mouseover", (event) => {
+                    showTooltip(`
+                        <div class="tt-title">${district}</div>
+                        <div class="tt-row"><span class="tt-label">Allocated:</span><span class="tt-value" style="color:#66bb6a">${vals.allocated.toLocaleString()}</span></div>
+                        <div class="tt-row"><span class="tt-label">Unmet:</span><span class="tt-value" style="color:#ef5350">${vals.unmet.toLocaleString()}</span></div>
+                    `, event);
+                })
+                .on("mouseout", hideTooltip);
+
+            // Unmet (red)
+            svg.append("rect")
+                .attr("x", x(vals.allocated)).attr("y", yPos)
+                .attr("width", x(vals.unmet)).attr("height", barH)
+                .attr("fill", "#ef5350").attr("rx", 3).attr("opacity", 0.6);
+        });
+
+        // Legend
+        const legendY = -10;
+        [{ color: "#66bb6a", label: "Allocated" }, { color: "#ef5350", label: "Unmet demand" }].forEach((item, i) => {
+            svg.append("rect").attr("x", width - 180 + i * 100).attr("y", legendY)
+                .attr("width", 12).attr("height", 12).attr("fill", item.color).attr("rx", 2);
+            svg.append("text").attr("x", width - 165 + i * 100).attr("y", legendY + 10)
+                .attr("font-size", "10px").attr("fill", "#9aa0a6").text(item.label);
+        });
+    }
+
+    // ════════════════════════════════════════════════════════
+    // VIEW 5: Alert Table
+    // ════════════════════════════════════════════════════════
+    function renderAlertTable() {
+        const container = d3.select("#alert-table-viz");
+        container.selectAll("*").remove();
+
+        let alerts = state.data.alerts || [];
+        if (state.disease !== "all") alerts = alerts.filter(a => a.disease === state.disease);
+        if (state.year !== "all") alerts = alerts.filter(a => String(a.epi_year) === state.year);
+        if (state.district !== "all") alerts = alerts.filter(a => a.district === state.district);
+
+        // Sort by z_c2 descending (highest severity first)
+        alerts = alerts.sort((a, b) => (b.z_c2 || 0) - (a.z_c2 || 0)).slice(0, 50);
+
+        if (alerts.length === 0) {
+            container.append("p")
+                .style("color", "var(--text-muted)")
+                .style("padding", "20px")
+                .text("No alerts for current selection.");
+            return;
+        }
+
+        const table = container.append("table").attr("class", "alert-table");
+
+        // Header
+        const thead = table.append("thead").append("tr");
+        ["Rank", "District", "Disease", "Year", "Week", "Cases", "Z-score (C2)", "Method"].forEach(h => {
+            thead.append("th").text(h);
+        });
+
+        // Body
+        const tbody = table.append("tbody");
+        alerts.forEach((a, i) => {
+            const tr = tbody.append("tr")
+                .on("click", () => {
+                    state.district = a.district;
+                    d3.select("#sel-district").property("value", state.district);
+                    renderAll();
+                })
+                .on("mouseover", (event) => {
+                    showTooltip(`
+                        <div class="tt-title">${a.district} — ${a.disease}</div>
+                        <div class="tt-row"><span class="tt-label">Z-score C2:</span><span class="tt-value">${(a.z_c2 || 0).toFixed(2)}</span></div>
+                        <div class="tt-row"><span class="tt-label">Z-score C3:</span><span class="tt-value">${(a.z_c3 || 0).toFixed(2)}</span></div>
+                        <div class="tt-row"><span class="tt-label">CUSUM:</span><span class="tt-value">${(a.cusum_s || 0).toFixed(2)}</span></div>
+                    `, event);
+                })
+                .on("mouseout", hideTooltip);
+
+            const severity = (a.z_c2 || 0) > 3 ? "#ef5350" : (a.z_c2 || 0) > 2 ? "#ffa726" : "#66bb6a";
+
+            tr.append("td").text(i + 1);
+            tr.append("td").html(`<span class="severity-dot" style="background:${severity}"></span>${a.district}`);
+            tr.append("td").style("color", DISEASE_COLORS[a.disease] || "#ccc").text(a.disease);
+            tr.append("td").text(a.epi_year);
+            tr.append("td").text(a.epi_week);
+            tr.append("td").text(a.case_count != null && a.case_count >= 5 ? a.case_count.toLocaleString() : '—');
+            tr.append("td").style("font-weight", "600").style("color", severity)
+                .text((a.z_c2 || 0).toFixed(2));
+
+            const methods = [];
+            if (a.alert_ears_c2) methods.push("EARS-C2");
+            if (a.alert_ears_c3) methods.push("EARS-C3");
+            if (a.alert_cusum) methods.push("CUSUM");
+            tr.append("td").text(methods.join(", ") || "—");
+        });
+    }
+
+    // ════════════════════════════════════════════════════════
+    // Render All + Event Handlers
+    // ════════════════════════════════════════════════════════
+    function renderAll() {
+        renderMap();
+        renderTimeSeries();
+        renderHeatmap();
+        renderAllocation();
+        renderAlertTable();
+    }
+
+    // Control event listeners (VIS-3: linked interaction)
+    d3.select("#sel-disease").on("change", function() {
+        state.disease = this.value;
+        renderAll();
+    });
+    d3.select("#sel-year").on("change", function() {
+        state.year = this.value;
+        renderAll();
+    });
+    d3.select("#sel-district").on("change", function() {
+        state.district = this.value;
+        renderAll();
+    });
+
+    // Resize handler
+    function debounce(func, wait) {
+        let timeout;
+        return function(...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+    }
+    window.addEventListener("resize", debounce(renderAll, 250));
+
+    // Initialize
+    loadData();
+    </script>
+</body>
+</html>

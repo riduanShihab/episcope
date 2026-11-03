@@ -1,0 +1,4 @@
+district_id,district_name,division,year,population,area,population_density,literacy_rate,poverty_rate,unemployment_rate,hospital_beds_per_10k
+BD-01,Bagerhat,Khulna,2025,1671000,3959.1,422.1,79.8,16.9,4.3,8.7
+BD-14,Dhaka,Dhaka,2025,15260000,1463.6,10426.3,85.4,8.5,4.1,20.4
+BD-64,Tangail,Dhaka,2025,4182000,3414.4,1224.8,70.1,20.1,4.5,7.7
