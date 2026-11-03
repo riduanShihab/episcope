@@ -3,55 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bangladesh District Intelligence Dashboard</title>
-    <meta name="description" content="Interactive Bangladesh 64-District Data & Intelligence Dashboard with GeoJSON Choropleth, Analytics, and Benchmarks">
-    
-    <!-- Leaflet CSS & JS -->
+    <title>EpiScope — Disease Surveillance & Response-Planning Platform</title>
+    <meta name="description" content="EpiScope: National-Scale Epidemiological Intelligence, Outbreak Detection & Automated Resource Allocation for Bangladesh">
+
+    <!-- Leaflet CSS & JS for 64-District Vector Map -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    
-    <!-- Chart.js -->
+
+    <!-- Chart.js for High-Performance Synchronized Analytics -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    
-    <!-- PapaParse for CSV Upload -->
-    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            /* Dark Theme (Default) */
-            --bg-body: #090d16;
-            --bg-surface: #101726;
-            --bg-surface-elevated: #172033;
-            --bg-surface-hover: #1f2c45;
-            --border-color: #23304a;
-            --border-focus: #00d2ff;
-            
-            --text-main: #f1f5f9;
+            /* EpiScope Dark Theme (Default) */
+            --bg-body: #0b0f19;
+            --bg-surface: #111827;
+            --bg-surface-elevated: #1a2234;
+            --bg-surface-hover: #232d42;
+            --border-color: #26334d;
+            --border-focus: #38bdf8;
+
+            --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --text-faint: #64748b;
-            
-            --primary: #00d2ff;
-            --primary-glow: rgba(0, 210, 255, 0.35);
-            --primary-subtle: rgba(0, 210, 255, 0.12);
-            --secondary: #3a7bd5;
+
+            /* Targeted Diseases Color Palette (VIS-6) */
+            --dengue: #ef5350;
+            --dengue-subtle: rgba(239, 83, 80, 0.15);
+            --diarrhoea: #38bdf8;
+            --diarrhoea-subtle: rgba(56, 189, 248, 0.15);
+            --influenza: #10b981;
+            --influenza-subtle: rgba(16, 185, 129, 0.15);
+            --malaria: #f59e0b;
+            --malaria-subtle: rgba(245, 158, 11, 0.15);
+            --all-diseases: #a855f7;
+
+            --primary: #38bdf8;
+            --primary-glow: rgba(56, 189, 248, 0.35);
             --accent-green: #10b981;
             --accent-amber: #f59e0b;
-            --accent-rose: #f43f5e;
-            --accent-purple: #8b5cf6;
-            
-            --map-ocean: #090d16;
-            --map-default: #1c273c;
-            --map-stroke: #2a3b5c;
-            
+            --accent-red: #ef5350;
+
             --card-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5), 0 2px 6px -1px rgba(0, 0, 0, 0.3);
             --radius-sm: 6px;
             --radius-md: 10px;
-            --radius-lg: 16px;
+            --radius-lg: 14px;
             --radius-full: 9999px;
             --transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
@@ -63,24 +64,11 @@
             --bg-surface-hover: #e2e8f0;
             --border-color: #cbd5e1;
             --border-focus: #0284c7;
-            
+
             --text-main: #0f172a;
             --text-muted: #475569;
             --text-faint: #94a3b8;
-            
-            --primary: #0284c7;
-            --primary-glow: rgba(2, 132, 199, 0.25);
-            --primary-subtle: rgba(2, 132, 199, 0.08);
-            --secondary: #2563eb;
-            --accent-green: #059669;
-            --accent-amber: #d97706;
-            --accent-rose: #e11d48;
-            --accent-purple: #7c3aed;
-            
-            --map-ocean: #f8fafc;
-            --map-default: #e2e8f0;
-            --map-stroke: #94a3b8;
-            
+
             --card-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
         }
 
@@ -115,6 +103,7 @@
             align-items: center;
             justify-content: space-between;
             gap: 16px;
+            flex-wrap: wrap;
         }
 
         .brand-container {
@@ -129,30 +118,22 @@
             width: 38px;
             height: 38px;
             border-radius: var(--radius-md);
-            background: linear-gradient(135deg, #006a4e, #f42a41);
+            background: linear-gradient(135deg, #0284c7, #38bdf8);
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 2px 8px rgba(0, 106, 78, 0.4);
-            position: relative;
+            box-shadow: 0 2px 10px rgba(2, 132, 199, 0.4);
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 18px;
             flex-shrink: 0;
         }
 
-        .brand-badge::after {
-            content: "";
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background-color: #f42a41;
-            position: absolute;
-            left: 12px;
-        }
-
         .brand-titles h1 {
-            font-size: 17px;
+            font-size: 18px;
             font-weight: 800;
             letter-spacing: -0.02em;
-            background: linear-gradient(90deg, var(--text-main), var(--primary));
+            background: linear-gradient(90deg, #38bdf8, #10b981);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             line-height: 1.2;
@@ -164,7 +145,7 @@
             font-weight: 500;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
         }
 
         .pulse-indicator {
@@ -181,7 +162,7 @@
             50% { opacity: 0.4; transform: scale(0.9); }
         }
 
-        /* ── Search & Controls in Header ── */
+        /* ── Nav Actions & Search ── */
         .nav-actions {
             display: flex;
             align-items: center;
@@ -191,17 +172,17 @@
 
         .search-box-wrapper {
             position: relative;
-            min-width: 260px;
+            min-width: 240px;
         }
 
         .search-input {
             width: 100%;
-            padding: 8px 14px 8px 34px;
+            padding: 7px 14px 7px 32px;
             border-radius: var(--radius-full);
             background-color: var(--bg-surface-elevated);
             border: 1px solid var(--border-color);
             color: var(--text-main);
-            font-size: 13px;
+            font-size: 12px;
             font-family: inherit;
             outline: none;
             transition: var(--transition);
@@ -209,18 +190,18 @@
 
         .search-input:focus {
             border-color: var(--border-focus);
-            box-shadow: 0 0 0 3px var(--primary-subtle);
+            box-shadow: 0 0 0 3px var(--diarrhoea-subtle);
         }
 
         .search-icon {
             position: absolute;
-            left: 11px;
+            left: 10px;
             top: 50%;
             transform: translateY(-50%);
             color: var(--text-faint);
             pointer-events: none;
-            width: 15px;
-            height: 15px;
+            width: 14px;
+            height: 14px;
         }
 
         .search-dropdown {
@@ -231,20 +212,18 @@
             background-color: var(--bg-surface);
             border: 1px solid var(--border-color);
             border-radius: var(--radius-md);
-            max-height: 280px;
+            max-height: 260px;
             overflow-y: auto;
             box-shadow: var(--card-shadow);
             z-index: 1050;
             display: none;
         }
 
-        .search-dropdown.open {
-            display: block;
-        }
+        .search-dropdown.open { display: block; }
 
         .search-item {
-            padding: 8px 14px;
-            font-size: 13px;
+            padding: 8px 12px;
+            font-size: 12px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -252,27 +231,18 @@
             transition: var(--transition);
         }
 
-        .search-item:hover, .search-item.highlighted {
-            background-color: var(--primary-subtle);
+        .search-item:hover {
+            background-color: var(--diarrhoea-subtle);
             color: var(--primary);
         }
 
-        .search-item .div-tag {
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: var(--radius-sm);
-            background-color: var(--bg-surface-hover);
-            color: var(--text-muted);
-        }
-
-        /* ── Action Buttons ── */
         .btn {
-            padding: 7px 14px;
+            padding: 6px 12px;
             border-radius: var(--radius-md);
             border: 1px solid var(--border-color);
             background-color: var(--bg-surface-elevated);
             color: var(--text-main);
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             cursor: pointer;
             display: inline-flex;
@@ -288,35 +258,114 @@
             color: var(--primary);
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: #ffffff;
-            border: none;
-            box-shadow: 0 2px 8px var(--primary-glow);
-        }
-
-        .btn-primary:hover {
-            opacity: 0.95;
-            transform: translateY(-1px);
-            color: #ffffff;
-        }
-
         .btn-icon {
-            padding: 8px;
+            padding: 7px;
             border-radius: var(--radius-full);
             line-height: 1;
         }
 
-        /* ── Container Layout ── */
+        /* ── Global Filter Bar (VIS-3 Linked Interaction) ── */
+        .controls-bar {
+            background-color: var(--bg-surface-elevated);
+            border-bottom: 1px solid var(--border-color);
+            padding: 10px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .filter-cluster {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .filter-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .filter-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+        }
+
+        .custom-select {
+            padding: 5px 10px;
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            color: var(--text-main);
+            font-size: 12px;
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .custom-select:focus {
+            border-color: var(--primary);
+        }
+
+        /* Disease Selector Pills */
+        .disease-pills {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .disease-btn {
+            padding: 4px 10px;
+            border-radius: var(--radius-full);
+            font-size: 11px;
+            font-weight: 700;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-surface);
+            color: var(--text-muted);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: var(--transition);
+        }
+
+        .disease-btn .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .disease-btn[data-disease="all"] .dot { background-color: var(--all-diseases); }
+        .disease-btn[data-disease="dengue"] .dot { background-color: var(--dengue); }
+        .disease-btn[data-disease="diarrhoea"] .dot { background-color: var(--diarrhoea); }
+        .disease-btn[data-disease="influenza"] .dot { background-color: var(--influenza); }
+        .disease-btn[data-disease="malaria"] .dot { background-color: var(--malaria); }
+
+        .disease-btn.active {
+            background-color: var(--bg-surface-hover);
+            color: #ffffff;
+            border-color: var(--primary);
+            box-shadow: 0 0 8px rgba(56, 189, 248, 0.2);
+        }
+
+        /* ── Dashboard Content Layout ── */
         .dashboard-container {
             flex: 1;
-            padding: 20px 24px;
+            padding: 18px 24px;
             max-width: 1750px;
             margin: 0 auto;
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 18px;
         }
 
         /* ── Top Statistics Cards ── */
@@ -330,7 +379,7 @@
             background-color: var(--bg-surface);
             border: 1px solid var(--border-color);
             border-radius: var(--radius-md);
-            padding: 16px;
+            padding: 14px 16px;
             box-shadow: var(--card-shadow);
             position: relative;
             overflow: hidden;
@@ -348,17 +397,14 @@
         .stat-card::before {
             content: "";
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
+            top: 0; left: 0; right: 0;
             height: 3px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            opacity: 0.8;
+            background: linear-gradient(90deg, var(--primary), #0284c7);
         }
 
-        .stat-card.variant-green::before { background: linear-gradient(90deg, var(--accent-green), #059669); }
-        .stat-card.variant-amber::before { background: linear-gradient(90deg, var(--accent-amber), #d97706); }
-        .stat-card.variant-purple::before { background: linear-gradient(90deg, var(--accent-purple), #7c3aed); }
+        .stat-card.alert-card::before { background: linear-gradient(90deg, var(--accent-red), #dc2626); }
+        .stat-card.forecast-card::before { background: linear-gradient(90deg, var(--accent-amber), #d97706); }
+        .stat-card.dq-card::before { background: linear-gradient(90deg, var(--accent-green), #059669); }
 
         .stat-header {
             display: flex;
@@ -369,11 +415,11 @@
             text-transform: uppercase;
             letter-spacing: 0.05em;
             color: var(--text-muted);
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         .stat-value {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 800;
             color: var(--text-main);
             letter-spacing: -0.02em;
@@ -382,9 +428,9 @@
         }
 
         .stat-subtext {
-            font-size: 12px;
+            font-size: 11px;
             color: var(--text-muted);
-            margin-top: 6px;
+            margin-top: 4px;
             display: flex;
             align-items: center;
             gap: 6px;
@@ -395,26 +441,22 @@
             font-weight: 700;
             padding: 2px 6px;
             border-radius: var(--radius-sm);
-            background-color: var(--primary-subtle);
+            background-color: var(--diarrhoea-subtle);
             color: var(--primary);
         }
 
-        /* ── Main Two-Column Grid ── */
-        .main-workspace {
+        /* ── Views Grid ── */
+        .views-grid {
             display: grid;
-            grid-template-columns: 1.15fr 0.85fr;
-            gap: 20px;
-            align-items: start;
+            grid-template-columns: 1.05fr 0.95fr;
+            gap: 18px;
         }
 
-        @media (max-width: 1180px) {
-            .main-workspace {
-                grid-template-columns: 1fr;
-            }
+        @media (max-width: 1200px) {
+            .views-grid { grid-template-columns: 1fr; }
         }
 
-        /* ── Map Card (Left Column) ── */
-        .map-card {
+        .card-view {
             background-color: var(--bg-surface);
             border: 1px solid var(--border-color);
             border-radius: var(--radius-lg);
@@ -424,16 +466,10 @@
             flex-direction: column;
         }
 
-        .map-toolbar {
-            padding: 14px 18px;
+        .view-header {
+            padding: 12px 18px;
             background-color: var(--bg-surface-elevated);
             border-bottom: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .toolbar-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -441,77 +477,27 @@
             flex-wrap: wrap;
         }
 
-        .filter-group {
+        .view-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-main);
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        .filter-label {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-muted);
-            white-space: nowrap;
-        }
-
-        .custom-select {
-            padding: 6px 12px;
-            background-color: var(--bg-surface);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            color: var(--text-main);
-            font-size: 12px;
-            font-weight: 600;
-            outline: none;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .custom-select:focus {
-            border-color: var(--primary);
-        }
-
-        /* Division filter pills */
-        .division-pills {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            overflow-x: auto;
-            padding-bottom: 2px;
-            scrollbar-width: thin;
-        }
-
-        .div-pill {
-            padding: 4px 10px;
-            border-radius: var(--radius-full);
+        .view-subtitle {
             font-size: 11px;
-            font-weight: 600;
-            background-color: var(--bg-surface);
-            border: 1px solid var(--border-color);
             color: var(--text-muted);
-            cursor: pointer;
-            white-space: nowrap;
-            transition: var(--transition);
+            font-weight: 500;
         }
 
-        .div-pill:hover {
-            color: var(--text-main);
-            border-color: var(--primary);
-        }
-
-        .div-pill.active {
-            background-color: var(--primary);
-            color: #ffffff;
-            border-color: var(--primary);
-            box-shadow: 0 2px 6px var(--primary-glow);
-        }
-
-        /* Map Container */
-        .map-wrapper {
+        /* ── View 1: Leaflet 64-District Choropleth Map ── */
+        .map-container-wrapper {
             position: relative;
-            height: 620px;
+            height: 520px;
             width: 100%;
-            background-color: var(--map-ocean);
+            background-color: #0b0f19;
         }
 
         #leaflet-map {
@@ -520,59 +506,47 @@
             background: transparent;
         }
 
-        /* Floating Controls on Map */
-        .map-floating-overlay {
+        .map-overlay-legend {
             position: absolute;
-            bottom: 20px;
-            left: 20px;
+            bottom: 18px;
+            left: 18px;
             z-index: 800;
-            background-color: rgba(16, 23, 38, 0.88);
+            background-color: rgba(17, 24, 39, 0.92);
             backdrop-filter: blur(8px);
             border: 1px solid var(--border-color);
             border-radius: var(--radius-md);
             padding: 10px 14px;
-            box-shadow: var(--card-shadow);
-            max-width: 250px;
-            pointer-events: auto;
-        }
-
-        .legend-title {
             font-size: 11px;
-            font-weight: 700;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-            margin-bottom: 6px;
-            display: flex;
-            justify-content: space-between;
+            box-shadow: var(--card-shadow);
+            max-width: 240px;
         }
 
-        .legend-bar {
+        .map-overlay-legend .grad-bar {
             height: 10px;
             border-radius: var(--radius-sm);
-            margin-bottom: 4px;
+            margin: 6px 0 4px 0;
+            background: linear-gradient(90deg, #1e293b, #ef5350);
         }
 
-        .legend-labels {
+        .map-overlay-legend .labels {
             display: flex;
             justify-content: space-between;
-            font-size: 11px;
-            font-weight: 600;
+            font-size: 10px;
             font-family: 'JetBrains Mono', monospace;
-            color: var(--text-main);
+            color: var(--text-muted);
         }
 
-        .map-reset-btn {
+        .map-btn-reset {
             position: absolute;
-            top: 20px;
-            right: 20px;
+            top: 18px;
+            right: 18px;
             z-index: 800;
             box-shadow: var(--card-shadow);
         }
 
-        /* Map Tooltips */
-        .custom-district-tooltip {
-            background-color: rgba(16, 23, 38, 0.95) !important;
+        /* Leaflet custom tooltip */
+        .episcope-tooltip {
+            background-color: rgba(17, 24, 39, 0.95) !important;
             border: 1px solid var(--border-focus) !important;
             border-radius: var(--radius-md) !important;
             color: #ffffff !important;
@@ -580,390 +554,150 @@
             padding: 10px 14px !important;
             font-family: 'Plus Jakarta Sans', sans-serif !important;
             font-size: 12px !important;
-            backdrop-filter: blur(6px);
+            backdrop-filter: blur(8px);
         }
 
-        .custom-district-tooltip .tt-header {
+        .episcope-tooltip .tt-district {
             font-size: 14px;
             font-weight: 800;
             color: var(--primary);
-            margin-bottom: 2px;
         }
 
-        .custom-district-tooltip .tt-div {
+        .episcope-tooltip .tt-div {
             font-size: 11px;
             color: var(--text-muted);
             margin-bottom: 6px;
-            font-weight: 500;
         }
 
-        .custom-district-tooltip .tt-row {
+        .episcope-tooltip .tt-row {
             display: flex;
             justify-content: space-between;
-            gap: 16px;
+            gap: 14px;
             margin-top: 3px;
         }
 
-        .custom-district-tooltip .tt-label {
-            color: var(--text-muted);
-        }
-
-        .custom-district-tooltip .tt-val {
+        .episcope-tooltip .tt-val {
             font-weight: 700;
             font-family: 'JetBrains Mono', monospace;
-            color: #ffffff;
         }
 
-        /* ── Right Column: Selected District / Analytics ── */
-        .analytics-column {
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
-        }
-
-        .info-card {
-            background-color: var(--bg-surface);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            box-shadow: var(--card-shadow);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            position: relative;
-        }
-
-        .card-header-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-        }
-
-        .district-title-box h2 {
-            font-size: 22px;
-            font-weight: 800;
-            color: var(--text-main);
-            letter-spacing: -0.02em;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .badge-pill {
-            font-size: 11px;
-            font-weight: 700;
-            padding: 3px 8px;
-            border-radius: var(--radius-full);
-            background-color: var(--primary-subtle);
-            color: var(--primary);
-            border: 1px solid var(--primary-glow);
-        }
-
-        .district-subinfo {
-            font-size: 12px;
-            color: var(--text-muted);
-            display: flex;
-            gap: 14px;
-            flex-wrap: wrap;
-            margin-top: 4px;
-        }
-
-        /* KPI Quick Grid */
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-        }
-
-        @media (max-width: 600px) {
-            .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-        }
-
-        .kpi-box {
-            background-color: var(--bg-surface-elevated);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            padding: 10px 12px;
-        }
-
-        .kpi-title {
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: var(--text-muted);
-            letter-spacing: 0.04em;
-        }
-
-        .kpi-number {
-            font-size: 16px;
-            font-weight: 800;
-            color: var(--text-main);
-            margin-top: 4px;
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        /* Charts Container */
-        .chart-card {
-            background-color: var(--bg-surface);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            padding: 18px;
-            box-shadow: var(--card-shadow);
-        }
-
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 14px;
-        }
-
-        .chart-header h3 {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--text-main);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .chart-container-radar {
+        /* ── View 2: Time Series & Forecast ── */
+        .chart-box {
+            padding: 16px;
             position: relative;
             height: 250px;
             width: 100%;
         }
 
-        .chart-container-bar {
-            position: relative;
-            height: 230px;
-            width: 100%;
-        }
-
-        .chart-container-line {
-            position: relative;
-            height: 220px;
-            width: 100%;
-        }
-
-        /* ── Bottom Section: Ranking Table & Division Overview ── */
-        .bottom-section {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .table-card {
-            background-color: var(--bg-surface);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            box-shadow: var(--card-shadow);
-            overflow: hidden;
-        }
-
-        .table-toolbar {
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-            flex-wrap: wrap;
-        }
-
-        .table-title-box h3 {
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--text-main);
-        }
-
-        .table-title-box p {
-            font-size: 12px;
-            color: var(--text-muted);
-        }
-
-        .table-controls {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .table-search-input {
-            padding: 6px 12px;
-            border-radius: var(--radius-md);
-            background-color: var(--bg-surface-elevated);
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            font-size: 12px;
-            outline: none;
-            width: 180px;
-        }
-
-        .table-responsive {
+        /* ── View 3: Seasonal Heatmap ── */
+        .heatmap-container {
+            padding: 14px 18px;
             overflow-x: auto;
-            max-height: 480px;
         }
 
-        table.district-table {
+        .heatmap-grid {
+            display: grid;
+            grid-template-columns: repeat(52, 1fr);
+            gap: 2px;
+            margin-top: 8px;
+        }
+
+        .heat-cell {
+            aspect-ratio: 1;
+            border-radius: 2px;
+            background-color: #1e293b;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .heat-cell:hover {
+            outline: 2px solid var(--primary);
+            transform: scale(1.3);
+            z-index: 10;
+        }
+
+        /* ── View 4 & 5 Bottom Row ── */
+        .bottom-views-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        @media (max-width: 1100px) {
+            .bottom-views-grid { grid-template-columns: 1fr; }
+        }
+
+        /* Alert Feed Table */
+        .alert-table-wrapper {
+            overflow-x: auto;
+            max-height: 320px;
+        }
+
+        table.alert-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 13px;
+            font-size: 12px;
             text-align: left;
         }
 
-        table.district-table th {
+        table.alert-table th {
             position: sticky;
             top: 0;
             background-color: var(--bg-surface-elevated);
-            padding: 12px 14px;
-            font-size: 11px;
+            padding: 10px 14px;
+            font-size: 10px;
             font-weight: 700;
             color: var(--text-muted);
             text-transform: uppercase;
-            letter-spacing: 0.04em;
-            border-bottom: 2px solid var(--border-color);
-            cursor: pointer;
-            user-select: none;
-            white-space: nowrap;
-        }
-
-        table.district-table th:hover {
-            color: var(--primary);
-        }
-
-        table.district-table td {
-            padding: 10px 14px;
+            letter-spacing: 0.05em;
             border-bottom: 1px solid var(--border-color);
             white-space: nowrap;
-            color: var(--text-main);
         }
 
-        table.district-table tr:hover {
-            background-color: var(--primary-subtle);
+        table.alert-table td {
+            padding: 8px 14px;
+            border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
+        }
+
+        table.alert-table tr:hover {
+            background-color: var(--diarrhoea-subtle);
             cursor: pointer;
         }
 
-        table.district-table tr.selected-row {
-            background-color: rgba(0, 210, 255, 0.18) !important;
-            font-weight: 700;
-        }
-
-        .rank-badge {
+        .severity-badge {
             display: inline-flex;
             align-items: center;
-            justify-content: center;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
+            gap: 5px;
             font-size: 11px;
             font-weight: 700;
-            background-color: var(--bg-surface-hover);
-            color: var(--text-muted);
+            padding: 2px 7px;
+            border-radius: var(--radius-sm);
         }
 
-        .rank-badge.top-3 {
-            background-color: var(--accent-amber);
-            color: #000000;
+        .severity-badge.high {
+            background-color: rgba(239, 83, 80, 0.2);
+            color: var(--accent-red);
+            border: 1px solid rgba(239, 83, 80, 0.4);
         }
 
-        /* ── Modals (Upload CSV & Comparison) ── */
-        .modal-backdrop {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(4px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            padding: 20px;
+        .severity-badge.medium {
+            background-color: rgba(245, 158, 11, 0.2);
+            color: var(--accent-amber);
+            border: 1px solid rgba(245, 158, 11, 0.4);
         }
 
-        .modal-backdrop.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background-color: var(--bg-surface);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            box-shadow: var(--card-shadow);
-            max-width: 650px;
-            width: 100%;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            animation: modal-enter 0.2s ease-out;
-        }
-
-        @keyframes modal-enter {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        .modal-header {
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .modal-header h3 {
-            font-size: 16px;
-            font-weight: 800;
-        }
-
-        .modal-body {
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .dropzone {
-            border: 2px dashed var(--border-color);
-            border-radius: var(--radius-md);
-            padding: 30px;
-            text-align: center;
-            cursor: pointer;
-            transition: var(--transition);
-            background-color: var(--bg-surface-elevated);
-        }
-
-        .dropzone:hover, .dropzone.dragover {
-            border-color: var(--primary);
-            background-color: var(--primary-subtle);
-        }
-
-        .modal-footer {
-            padding: 14px 20px;
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-        }
-
-        /* ── Comparison Panel ── */
-        .comparison-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 16px;
-        }
-
-        .comp-card {
-            background-color: var(--bg-surface-elevated);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            padding: 14px;
+        .severity-badge.low {
+            background-color: rgba(16, 185, 129, 0.2);
+            color: var(--accent-green);
+            border: 1px solid rgba(16, 185, 129, 0.4);
         }
 
         /* ── Footer ── */
         footer {
             margin-top: auto;
             border-top: 1px solid var(--border-color);
-            padding: 18px 24px;
+            padding: 16px 24px;
             background-color: var(--bg-surface);
             font-size: 12px;
             color: var(--text-muted);
@@ -974,551 +708,394 @@
             gap: 12px;
         }
 
-        /* Leaflet custom overrides */
-        .leaflet-container {
-            font-family: inherit !important;
-        }
-        .leaflet-control-zoom {
-            border: 1px solid var(--border-color) !important;
-            border-radius: var(--radius-md) !important;
-            overflow: hidden;
-            box-shadow: var(--card-shadow) !important;
-        }
-        .leaflet-control-zoom a {
-            background-color: var(--bg-surface) !important;
-            color: var(--text-main) !important;
-            border-bottom: 1px solid var(--border-color) !important;
-        }
-        .leaflet-control-zoom a:hover {
-            background-color: var(--bg-surface-hover) !important;
-            color: var(--primary) !important;
+        .badge-clean {
+            background-color: rgba(16, 185, 129, 0.15);
+            color: var(--accent-green);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 700;
         }
     </style>
 </head>
 <body>
 
-    <!-- ── Header ── -->
+    <!-- ── Top Navigation Bar ── -->
     <header class="top-navbar">
-        <a href="#" class="brand-container" id="btn-brand-home">
-            <div class="brand-badge"></div>
+        <a href="#" class="brand-container" id="btn-brand-reset">
+            <div class="brand-badge">🔬</div>
             <div class="brand-titles">
-                <h1>Bangladesh District Intelligence Dashboard</h1>
+                <h1>EpiScope — Surveillance & Response-Planning Platform</h1>
                 <div class="subtitle">
                     <span class="pulse-indicator"></span>
-                    <span>All 64 Districts • 8 Administrative Divisions • BBS 2022 Benchmark</span>
+                    <span id="header-freshness">National Epidemiological Intelligence • All 64 Districts</span>
+                    <span class="badge-clean">DQ Pass Rate: 96.5%</span>
                 </div>
             </div>
         </a>
 
         <div class="nav-actions">
-            <!-- Search District Input -->
+            <!-- District Quick Search -->
             <div class="search-box-wrapper">
-                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 </svg>
-                <input type="text" id="search-district" class="search-input" placeholder="Search district (e.g. Dhaka, Bogura)..." autocomplete="off">
+                <input type="text" id="search-district" class="search-input" placeholder="Search 64 districts (e.g. Dhaka, Bogura)..." autocomplete="off">
                 <div id="search-dropdown" class="search-dropdown"></div>
             </div>
 
-            <!-- Compare Districts Button -->
-            <button id="btn-open-compare" class="btn" title="Compare 2 or more districts">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="2" y="3" width="8" height="18" rx="2"></rect>
-                    <rect x="14" y="3" width="8" height="18" rx="2"></rect>
-                </svg>
-                Compare
-            </button>
-
-            <!-- CSV Upload Button -->
-            <button id="btn-open-upload" class="btn" title="Upload custom CSV dataset">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="17 8 12 3 7 8"></polyline>
-                    <line x1="12" y1="3" x2="12" y2="15"></line>
-                </svg>
-                Upload CSV
-            </button>
-
-            <!-- Dark / Light Mode Toggle -->
+            <!-- Light / Dark Mode Toggle -->
             <button id="btn-toggle-theme" class="btn btn-icon" title="Toggle Light/Dark Theme">
                 <svg id="theme-icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;">
                     <circle cx="12" cy="12" r="5"></circle>
                     <line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line>
                     <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
                     <line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line>
-                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                 </svg>
                 <svg id="theme-icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
                 </svg>
             </button>
-
-            <!-- EpiScope Surveillance Link -->
-            <a href="episcope_surveillance.html" class="btn" title="View Disease Surveillance View">
-                EpiScope View &rarr;
-            </a>
         </div>
     </header>
 
-    <!-- ── Main Dashboard Container ── -->
-    <main class="dashboard-container">
-
-        <!-- Top Statistics KPI Cards -->
-        <section class="stats-grid" id="stats-summary">
-            <!-- Card 1: Total Districts -->
-            <div class="stat-card">
-                <div class="stat-header">
-                    <span>Administrative Units</span>
-                    <span class="stat-tag">Full Coverage</span>
-                </div>
-                <div class="stat-value">64 / 64</div>
-                <div class="stat-subtext">8 Administrative Divisions</div>
-            </div>
-
-            <!-- Card 2: Selected District / National -->
-            <div class="stat-card variant-purple">
-                <div class="stat-header">
-                    <span id="card-selection-label">Current Selection</span>
-                    <span id="badge-selection-div" class="stat-tag">National</span>
-                </div>
-                <div class="stat-value" id="card-selection-name">All Bangladesh</div>
-                <div class="stat-subtext" id="card-selection-sub">Click any district on map</div>
-            </div>
-
-            <!-- Card 3: Population -->
-            <div class="stat-card variant-green">
-                <div class="stat-header">
-                    <span>Total Population</span>
-                    <span id="badge-pop-year" class="stat-tag">2025 Est.</span>
-                </div>
-                <div class="stat-value" id="card-stat-population">170,845,000</div>
-                <div class="stat-subtext" id="card-stat-pop-sub">National aggregate</div>
-            </div>
-
-            <!-- Card 4: Population Density -->
-            <div class="stat-card variant-amber">
-                <div class="stat-header">
-                    <span>Population Density</span>
-                    <span class="stat-tag">BBS 2022+</span>
-                </div>
-                <div class="stat-value" id="card-stat-density">1,158 / km²</div>
-                <div class="stat-subtext" id="card-stat-density-sub">Across 147,570 km² land area</div>
-            </div>
-
-            <!-- Card 5: Active Indicator Value & Rank -->
-            <div class="stat-card">
-                <div class="stat-header">
-                    <span id="card-active-indicator-name">Literacy Rate</span>
-                    <span id="card-active-rank" class="stat-tag">National Avg</span>
-                </div>
-                <div class="stat-value" id="card-active-val">76.5%</div>
-                <div class="stat-subtext" id="card-active-sub">Target BBS 2025 benchmark</div>
-            </div>
-        </section>
-
-        <!-- Main Workspace (Two-Column Layout) -->
-        <section class="main-workspace">
-            
-            <!-- Left: Interactive Bangladesh Map -->
-            <div class="map-card">
-                <div class="map-toolbar">
-                    <div class="toolbar-row">
-                        <!-- Choropleth Indicator Selector -->
-                        <div class="filter-group">
-                            <label class="filter-label" for="sel-indicator">Indicator:</label>
-                            <select id="sel-indicator" class="custom-select">
-                                <optgroup label="Demographics">
-                                    <option value="population">Total Population</option>
-                                    <option value="population_density" selected>Population Density (per km²)</option>
-                                </optgroup>
-                                <optgroup label="Socio-Economic">
-                                    <option value="literacy_rate">Literacy Rate (7+ yrs, %)</option>
-                                    <option value="poverty_rate">Poverty Headcount Rate (%)</option>
-                                    <option value="unemployment_rate">Unemployment Rate (%)</option>
-                                </optgroup>
-                                <optgroup label="Infrastructure & Healthcare">
-                                    <option value="hospital_beds_per_10k">Hospital Beds (per 10k pop)</option>
-                                    <option value="electricity_access_pct">Electricity Access (%)</option>
-                                    <option value="internet_penetration_pct">Internet Penetration (%)</option>
-                                </optgroup>
-                                <optgroup label="Environment & Climate">
-                                    <option value="forest_coverage_pct">Forest Coverage (%)</option>
-                                    <option value="annual_rainfall_mm">Annual Rainfall (mm)</option>
-                                </optgroup>
-                            </select>
-                        </div>
-
-                        <!-- Year Filter -->
-                        <div class="filter-group">
-                            <label class="filter-label" for="sel-year">Year:</label>
-                            <select id="sel-year" class="custom-select">
-                                <option value="2025" selected>2025 (Projected)</option>
-                                <option value="2024">2024</option>
-                                <option value="2023">2023</option>
-                                <option value="2022">2022 (Census Benchmark)</option>
-                                <option value="2021">2021</option>
-                            </select>
-                        </div>
-
-                        <!-- Map Style Toggle -->
-                        <div class="filter-group">
-                            <label class="filter-label" for="sel-basemap">Basemap:</label>
-                            <select id="sel-basemap" class="custom-select">
-                                <option value="dark">Dark Matter (Clean)</option>
-                                <option value="light">Positron (Light)</option>
-                                <option value="osm">OpenStreetMap</option>
-                                <option value="none">Vector Only (No Tiles)</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Division Filter Pills -->
-                    <div class="toolbar-row">
-                        <div class="filter-label">Filter Division:</div>
-                        <div class="division-pills" id="division-pills-container">
-                            <button class="div-pill active" data-division="all">All Divisions (8)</button>
-                            <button class="div-pill" data-division="Dhaka">Dhaka (13)</button>
-                            <button class="div-pill" data-division="Chattogram">Chattogram (11)</button>
-                            <button class="div-pill" data-division="Rajshahi">Rajshahi (8)</button>
-                            <button class="div-pill" data-division="Khulna">Khulna (10)</button>
-                            <button class="div-pill" data-division="Barishal">Barishal (6)</button>
-                            <button class="div-pill" data-division="Sylhet">Sylhet (4)</button>
-                            <button class="div-pill" data-division="Rangpur">Rangpur (8)</button>
-                            <button class="div-pill" data-division="Mymensingh">Mymensingh (4)</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Leaflet Map Canvas -->
-                <div class="map-wrapper">
-                    <div id="leaflet-map"></div>
-
-                    <!-- Floating Legend -->
-                    <div class="map-floating-overlay" id="map-legend">
-                        <div class="legend-title">
-                            <span id="legend-indicator-label">Density</span>
-                            <span id="legend-unit-label">/ km²</span>
-                        </div>
-                        <div class="legend-bar" id="legend-gradient"></div>
-                        <div class="legend-labels">
-                            <span id="legend-min">0</span>
-                            <span id="legend-mid">--</span>
-                            <span id="legend-max">10k+</span>
-                        </div>
-                    </div>
-
-                    <!-- Reset Map Button -->
-                    <button id="btn-reset-map" class="btn map-reset-btn" title="Reset Map View">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
-                            <path d="M3 3v5h5"></path>
-                        </svg>
-                        Reset National View
+    <!-- ── Synchronized Control Bar (VIS-3) ── -->
+    <nav class="controls-bar">
+        <div class="filter-cluster">
+            <!-- Disease Selector -->
+            <div class="filter-item">
+                <span class="filter-label">Disease:</span>
+                <div class="disease-pills" id="disease-pills">
+                    <button class="disease-btn active" data-disease="dengue">
+                        <span class="dot"></span> Dengue (A90)
+                    </button>
+                    <button class="disease-btn" data-disease="diarrhoea">
+                        <span class="dot"></span> Diarrhoea (A00, A09)
+                    </button>
+                    <button class="disease-btn" data-disease="influenza">
+                        <span class="dot"></span> Influenza (J10)
+                    </button>
+                    <button class="disease-btn" data-disease="malaria">
+                        <span class="dot"></span> Malaria (B50-B54)
+                    </button>
+                    <button class="disease-btn" data-disease="all">
+                        <span class="dot"></span> All Diseases
                     </button>
                 </div>
             </div>
 
-            <!-- Right: District Intelligence Details & Dynamic Visualizations -->
-            <div class="analytics-column">
-                
-                <!-- District / Overview Card -->
-                <div class="info-card" id="district-info-card">
-                    <div class="card-header-row">
-                        <div class="district-title-box">
-                            <h2 id="detail-district-name">Dhaka District</h2>
-                            <div class="district-subinfo">
-                                <span>Division: <strong id="detail-division-name" style="color:var(--primary);">Dhaka</strong></span>
-                                <span>District ID: <strong id="detail-district-id">BD-14</strong></span>
-                                <span>Headquarters: <strong id="detail-district-hq">Dhaka</strong></span>
+            <!-- Year Selector -->
+            <div class="filter-item">
+                <label class="filter-label" for="sel-year">Year:</label>
+                <select id="sel-year" class="custom-select">
+                    <option value="2025" selected>2025</option>
+                    <option value="2024">2024</option>
+                    <option value="2023">2023</option>
+                    <option value="2022">2022</option>
+                    <option value="2021">2021</option>
+                    <option value="all">All Years (5-Yr Multi-Scale)</option>
+                </select>
+            </div>
+
+            <!-- Division Filter -->
+            <div class="filter-item">
+                <label class="filter-label" for="sel-division">Division:</label>
+                <select id="sel-division" class="custom-select">
+                    <option value="all">All 8 Divisions</option>
+                    <option value="Dhaka">Dhaka (13)</option>
+                    <option value="Chattogram">Chattogram (11)</option>
+                    <option value="Rajshahi">Rajshahi (8)</option>
+                    <option value="Khulna">Khulna (10)</option>
+                    <option value="Barishal">Barishal (6)</option>
+                    <option value="Sylhet">Sylhet (4)</option>
+                    <option value="Rangpur">Rangpur (8)</option>
+                    <option value="Mymensingh">Mymensingh (4)</option>
+                </select>
+            </div>
+
+            <!-- District Dropdown -->
+            <div class="filter-item">
+                <label class="filter-label" for="sel-district">District:</label>
+                <select id="sel-district" class="custom-select">
+                    <option value="all">All 64 Districts</option>
+                </select>
+            </div>
+        </div>
+
+        <button id="btn-reset-filters" class="btn" title="Reset all filters">
+            ↺ Reset All Filters
+        </button>
+    </nav>
+
+    <!-- ── Dashboard Main Container ── -->
+    <main class="dashboard-container">
+
+        <!-- Top Statistics KPI Cards -->
+        <section class="stats-grid">
+            <!-- Card 1: Selected District / National Overview -->
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span>Surveillance Region</span>
+                    <span id="badge-division-name" class="stat-tag">National</span>
+                </div>
+                <div class="stat-value" id="kpi-district-name">All 64 Districts</div>
+                <div class="stat-subtext" id="kpi-district-sub">Population: 170.8M • 8 Divisions</div>
+            </div>
+
+            <!-- Card 2: Observed Cases (PRV-2 Small-cell privacy preserved) -->
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span>Observed Incidence</span>
+                    <span id="badge-disease-name" class="stat-tag" style="background:var(--dengue-subtle); color:var(--dengue);">Dengue</span>
+                </div>
+                <div class="stat-value" id="kpi-case-count">--</div>
+                <div class="stat-subtext" id="kpi-case-sub">Clean clinical encounters (S1, S4)</div>
+            </div>
+
+            <!-- Card 3: Active Outbreak Alerts (AN-1 EARS / CUSUM) -->
+            <div class="stat-card alert-card">
+                <div class="stat-header">
+                    <span>Active Outbreak Alerts</span>
+                    <span class="stat-tag" style="background:rgba(239,83,80,0.15); color:var(--accent-red);">EARS C1-C3 / CUSUM</span>
+                </div>
+                <div class="stat-value" id="kpi-alert-count">0</div>
+                <div class="stat-subtext" id="kpi-alert-sub">Surveillance districts exceeding threshold</div>
+            </div>
+
+            <!-- Card 4: 1–4 Week Forecast Demand (AN-4, AN-6) -->
+            <div class="stat-card forecast-card">
+                <div class="stat-header">
+                    <span>4-Wk Forecast Demand</span>
+                    <span class="stat-tag" style="background:rgba(245,158,11,0.15); color:var(--accent-amber);">Climate Regressed</span>
+                </div>
+                <div class="stat-value" id="kpi-forecast-demand">--</div>
+                <div class="stat-subtext" id="kpi-forecast-sub">Beds & IV consumable projection</div>
+            </div>
+
+            <!-- Card 5: Supply Sufficiency & LP Optimisation (AN-7) -->
+            <div class="stat-card dq-card">
+                <div class="stat-header">
+                    <span>LP Resource Status</span>
+                    <span class="stat-tag" style="background:rgba(16,185,129,0.15); color:var(--accent-green);">Equity Floor α=0.1</span>
+                </div>
+                <div class="stat-value" id="kpi-alloc-sufficiency">100%</div>
+                <div class="stat-subtext" id="kpi-alloc-sub">Zero unmet critical demand</div>
+            </div>
+        </section>
+
+        <!-- Main Surveillance Views Grid -->
+        <section class="views-grid">
+
+            <!-- View 1: Leaflet 64-District Choropleth Map -->
+            <div class="card-view">
+                <div class="view-header">
+                    <div>
+                        <div class="view-title">
+                            <span>🗺️ View 1: Bangladesh 64-District Geographic Choropleth Map</span>
+                        </div>
+                        <div class="view-subtitle">Official geoBoundaries ADM2 Vector Boundaries • Click any district to zoom & link all 5 views</div>
+                    </div>
+                    <div style="display:flex; gap:8px;">
+                        <select id="sel-map-metric" class="custom-select" style="font-size:11px;">
+                            <option value="cases">Case Counts</option>
+                            <option value="incidence">Incidence per 100k</option>
+                            <option value="alerts">Outbreak Alert Severity</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="map-container-wrapper">
+                    <div id="leaflet-map"></div>
+
+                    <!-- Floating Map Legend -->
+                    <div class="map-overlay-legend" id="map-legend">
+                        <div style="font-weight:700; color:var(--text-main); font-size:11px;" id="legend-title">Incidence Burden</div>
+                        <div class="grad-bar" id="legend-gradient"></div>
+                        <div class="labels">
+                            <span id="legend-min">0</span>
+                            <span id="legend-max">Max</span>
+                        </div>
+                    </div>
+
+                    <!-- Reset Map Zoom Button -->
+                    <button id="btn-reset-map-zoom" class="btn map-btn-reset" title="Reset Map View">
+                        ↺ Reset Map
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Column: View 2 & View 3 -->
+            <div style="display: flex; flex-direction: column; gap: 18px;">
+
+                <!-- View 2: Epidemiological Timeline & 1-4 Week Forecast -->
+                <div class="card-view">
+                    <div class="view-header">
+                        <div>
+                            <div class="view-title">
+                                <span>📈 View 2: Epidemiological Timeline & 1–4 Wk Forecasts</span>
+                            </div>
+                            <div class="view-subtitle" id="timeline-subtitle">Weekly incidence with 80% prediction intervals (AN-4)</div>
+                        </div>
+                    </div>
+                    <div class="chart-box">
+                        <canvas id="chart-timeseries"></canvas>
+                    </div>
+                </div>
+
+                <!-- View 3: Seasonal Outbreak Heatmap & Preparedness Calendar -->
+                <div class="card-view">
+                    <div class="view-header">
+                        <div>
+                            <div class="view-title">
+                                <span>🗓️ View 3: Seasonal Outbreak Calendar & Peak Decomposition</span>
+                            </div>
+                            <div class="view-subtitle">Epi-Week 1 to 52 surge windows • Historical seasonal index (AN-9)</div>
+                        </div>
+                    </div>
+                    <div class="heatmap-container">
+                        <div style="display: flex; justify-content: space-between; font-size: 10px; color: var(--text-muted); margin-bottom: 2px;">
+                            <span>Week 1 (Jan)</span>
+                            <span>Week 20 (Pre-Monsoon)</span>
+                            <span>Week 35 (Late Monsoon Peak)</span>
+                            <span>Week 52 (Dec)</span>
+                        </div>
+                        <div class="heatmap-grid" id="heatmap-grid">
+                            <!-- Populated with 52 epi-week blocks -->
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 11px;">
+                            <span id="heatmap-selected-info" style="color:var(--text-muted);">Hover an epi-week block to inspect risk</span>
+                            <div style="display: flex; gap: 8px; align-items: center; font-size: 10px;">
+                                <span>Risk:</span>
+                                <span style="display:inline-block; width:10px; height:10px; background:#1e293b; border-radius:2px;"></span> Baseline
+                                <span style="display:inline-block; width:10px; height:10px; background:#f59e0b; border-radius:2px;"></span> Moderate
+                                <span style="display:inline-block; width:10px; height:10px; background:#ef5350; border-radius:2px;"></span> High Surge
                             </div>
                         </div>
-                        <button id="btn-deselect-district" class="btn" style="padding: 5px 10px; font-size: 11px;">
-                            ✕ Overview
-                        </button>
-                    </div>
-
-                    <!-- Quick Metrics Grid -->
-                    <div class="kpi-grid">
-                        <div class="kpi-box">
-                            <div class="kpi-title">Land Area</div>
-                            <div class="kpi-number" id="detail-kpi-area">1,463.6 km²</div>
-                        </div>
-                        <div class="kpi-box">
-                            <div class="kpi-title">Population</div>
-                            <div class="kpi-number" id="detail-kpi-pop">15.2M</div>
-                        </div>
-                        <div class="kpi-box">
-                            <div class="kpi-title">Density</div>
-                            <div class="kpi-number" id="detail-kpi-density">10,426 / km²</div>
-                        </div>
-                        <div class="kpi-box">
-                            <div class="kpi-title">Literacy Rate</div>
-                            <div class="kpi-number" id="detail-kpi-lit">85.4%</div>
-                        </div>
-                        <div class="kpi-box">
-                            <div class="kpi-title">Poverty Rate</div>
-                            <div class="kpi-number" id="detail-kpi-pov">8.5%</div>
-                        </div>
-                        <div class="kpi-box">
-                            <div class="kpi-title">Hospital Beds</div>
-                            <div class="kpi-number" id="detail-kpi-beds">20.4 / 10k</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Radar Chart: Multi-Indicator Performance Profile -->
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <h3>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon>
-                            </svg>
-                            District Performance Profile vs. National Average
-                        </h3>
-                        <span class="badge-pill" id="badge-radar-dist">Selected District</span>
-                    </div>
-                    <div class="chart-container-radar">
-                        <canvas id="chart-radar"></canvas>
-                    </div>
-                </div>
-
-                <!-- Bar Chart: Division Peers & National Comparison -->
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <h3>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="18" y1="20" x2="18" y2="10"></line>
-                                <line x1="12" y1="20" x2="12" y2="4"></line>
-                                <line x1="6" y1="20" x2="6" y2="14"></line>
-                            </svg>
-                            <span id="title-bar-chart">Top & Bottom District Benchmarks</span>
-                        </h3>
-                    </div>
-                    <div class="chart-container-bar">
-                        <canvas id="chart-bar"></canvas>
-                    </div>
-                </div>
-
-                <!-- Line Chart: 5-Year Historical & Projected Trend (2021-2025) -->
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <h3>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-                            </svg>
-                            5-Year Indicator Trend (2021 – 2025)
-                        </h3>
-                    </div>
-                    <div class="chart-container-line">
-                        <canvas id="chart-line"></canvas>
                     </div>
                 </div>
 
             </div>
         </section>
 
-        <!-- Bottom Section: Comprehensive District Ranking & Explorer Table -->
-        <section class="bottom-section">
-            <div class="table-card">
-                <div class="table-toolbar">
-                    <div class="table-title-box">
-                        <h3>All 64 Districts Ranking & Data Explorer</h3>
-                        <p>Click any district row to instantly locate and zoom on the map • Sortable columns</p>
-                    </div>
-                    <div class="table-controls">
-                        <input type="text" id="table-search-input" class="table-search-input" placeholder="Filter table...">
-                        <select id="table-div-filter" class="custom-select">
-                            <option value="all">All Divisions (8)</option>
-                            <option value="Dhaka">Dhaka</option>
-                            <option value="Chattogram">Chattogram</option>
-                            <option value="Rajshahi">Rajshahi</option>
-                            <option value="Khulna">Khulna</option>
-                            <option value="Barishal">Barishal</option>
-                            <option value="Sylhet">Sylhet</option>
-                            <option value="Rangpur">Rangpur</option>
-                            <option value="Mymensingh">Mymensingh</option>
-                        </select>
-                        <button id="btn-export-csv" class="btn" title="Export current table to CSV">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                <polyline points="7 10 12 15 17 10"></polyline>
-                                <line x1="12" y1="15" x2="12" y2="3"></line>
-                            </svg>
-                            Export CSV
-                        </button>
+        <!-- Bottom Views Row: View 4 (Allocation) & View 5 (Alert Feed) -->
+        <section class="bottom-views-grid">
+
+            <!-- View 4: PuLP LP Resource Allocation -->
+            <div class="card-view">
+                <div class="view-header">
+                    <div>
+                        <div class="view-title">
+                            <span>📦 View 4: LP Resource Allocation & Stock Sufficiency</span>
+                        </div>
+                        <div class="view-subtitle">PuLP Branch-and-Cut with mandatory regional equity floor (AN-7)</div>
                     </div>
                 </div>
+                <div class="chart-box" style="height: 290px;">
+                    <canvas id="chart-allocation"></canvas>
+                </div>
+            </div>
 
-                <div class="table-responsive">
-                    <table class="district-table" id="district-ranking-table">
+            <!-- View 5: Outbreak Detection Alert Feed -->
+            <div class="card-view">
+                <div class="view-header">
+                    <div>
+                        <div class="view-title">
+                            <span>🚨 View 5: CDC EARS & CUSUM Active Alert Feed</span>
+                        </div>
+                        <div class="view-subtitle">High-sensitivity statistical anomaly signals (AN-1) • Click row to locate</div>
+                    </div>
+                    <span id="badge-total-alerts" class="stat-tag" style="background:rgba(239,83,80,0.15); color:var(--accent-red);">0 Alerts</span>
+                </div>
+                <div class="alert-table-wrapper">
+                    <table class="alert-table" id="table-alerts">
                         <thead>
                             <tr>
-                                <th data-sort="rank">Rank ↕</th>
-                                <th data-sort="district_name">District ↕</th>
-                                <th data-sort="division">Division ↕</th>
-                                <th data-sort="population">Population ↕</th>
-                                <th data-sort="area">Area (km²) ↕</th>
-                                <th data-sort="population_density">Density (/km²) ↕</th>
-                                <th data-sort="literacy_rate">Literacy (%) ↕</th>
-                                <th data-sort="poverty_rate">Poverty (%) ↕</th>
-                                <th data-sort="unemployment_rate">Unemp (%) ↕</th>
-                                <th data-sort="hospital_beds_per_10k">Beds/10k ↕</th>
-                                <th>Action</th>
+                                <th>Severity</th>
+                                <th>District</th>
+                                <th>Division</th>
+                                <th>Disease</th>
+                                <th>Epi-Week</th>
+                                <th>Cases</th>
+                                <th>Z-Score</th>
+                                <th>Method</th>
                             </tr>
                         </thead>
-                        <tbody id="table-body">
-                            <!-- Populated dynamically via JS -->
+                        <tbody id="alerts-tbody">
+                            <!-- Dynamically populated -->
                         </tbody>
                     </table>
                 </div>
             </div>
+
         </section>
 
     </main>
 
-    <!-- ── Comparison Modal ── -->
-    <div class="modal-backdrop" id="modal-compare">
-        <div class="modal-content" style="max-width: 850px;">
-            <div class="modal-header">
-                <h3>Compare Bangladesh Districts</h3>
-                <button class="btn btn-icon" id="btn-close-compare">✕</button>
-            </div>
-            <div class="modal-body">
-                <div style="display: flex; gap: 16px; margin-bottom: 12px; flex-wrap: wrap;">
-                    <div style="flex: 1; min-width: 200px;">
-                        <label class="filter-label">District A:</label>
-                        <select id="comp-sel-a" class="custom-select" style="width: 100%; margin-top: 4px;"></select>
-                    </div>
-                    <div style="flex: 1; min-width: 200px;">
-                        <label class="filter-label">District B:</label>
-                        <select id="comp-sel-b" class="custom-select" style="width: 100%; margin-top: 4px;"></select>
-                    </div>
-                </div>
-
-                <div class="comparison-grid" id="comparison-result-grid">
-                    <!-- Populated dynamically -->
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn" id="btn-close-compare-footer">Close</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ── CSV Upload Modal ── -->
-    <div class="modal-backdrop" id="modal-upload">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Upload Custom District Dataset (CSV)</h3>
-                <button class="btn btn-icon" id="btn-close-upload">✕</button>
-            </div>
-            <div class="modal-body">
-                <p style="font-size: 13px; color: var(--text-muted);">
-                    Upload a custom CSV file to replace or overlay indicator data for the 64 districts. Missing values will be represented as <strong>"N/A"</strong>.
-                </p>
-
-                <div class="dropzone" id="csv-dropzone">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom: 8px; color: var(--primary);">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="17 8 12 3 7 8"></polyline>
-                        <line x1="12" y1="3" x2="12" y2="15"></line>
-                    </svg>
-                    <p style="font-size: 14px; font-weight: 700; color: var(--text-main);">Drag & Drop CSV file here, or click to browse</p>
-                    <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Supports headers: district_id, district_name, division, year, population, area, literacy_rate, etc.</p>
-                    <input type="file" id="file-input-csv" accept=".csv" style="display: none;">
-                </div>
-
-                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px;">
-                    <a href="data/district_template.csv" download class="btn" style="padding: 4px 8px; font-size: 11px;">
-                        📥 Download Sample Template (.csv)
-                    </a>
-                    <button id="btn-reset-default-data" class="btn" style="padding: 4px 8px; font-size: 11px;">
-                        ↺ Reset to Default BBS Data
-                    </button>
-                </div>
-
-                <div id="upload-status" style="font-size: 12px; display: none; padding: 10px; border-radius: var(--radius-md);"></div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn" id="btn-cancel-upload">Cancel</button>
-                <button class="btn btn-primary" id="btn-apply-csv" disabled>Apply Dataset</button>
-            </div>
-        </div>
-    </div>
-
     <!-- ── Footer ── -->
     <footer>
         <div>
-            <strong>Bangladesh District Intelligence Dashboard</strong> • Geographically verified 64-District GeoJSON boundaries (geoBoundaries ADM2).
+            <strong>EpiScope Surveillance Engine</strong> • Complex Engineering Problem (CSE 4345) • Premier University
         </div>
         <div>
-            Data Benchmarks: Bangladesh Bureau of Statistics (BBS) Population & Housing Census 2022 & SVRS Projections.
+            Privacy: Salted SHA-256 Hashing • 5-Yr Age Banding • Small-Cell Suppression ($k < 5 \to \text{suppressed}$)
         </div>
     </footer>
 
-    <!-- ── Application Logic ── -->
+    <!-- ── JavaScript Application Logic ── -->
     <script>
         // ══════════════════════════════════════════════════════════════════
-        // Global Application State
+        // State & Configuration
         // ══════════════════════════════════════════════════════════════════
-        const AppState = {
-            geoData: null,              // GeoJSON feature collection (64 districts)
-            indicatorData: null,         // Full records
-            activeYear: 2025,
-            activeIndicator: "population_density",
-            activeDivision: "all",
-            selectedDistrict: null,      // e.g. "Dhaka"
-            theme: localStorage.getItem("bd_dash_theme") || "dark",
-            
-            // Map & Chart Instances
+        const EpiState = {
+            disease: "dengue",
+            year: "2025",
+            division: "all",
+            district: "all",
+            mapMetric: "cases",
+            theme: localStorage.getItem("episcope_theme") || "dark",
+
+            // Serving payload cache
+            data: {
+                geo: null,
+                timeseries: [],
+                alerts: [],
+                forecasts: [],
+                allocation: [],
+                districts: [],
+                dqReport: null,
+                calendar: [],
+                calendarSummary: {}
+            },
+
+            // Visual components
             map: null,
-            geoJsonLayer: null,
-            baseTileLayer: null,
-            radarChart: null,
-            barChart: null,
-            lineChart: null,
-            
-            // Table state
-            tableSortKey: "population_density",
-            tableSortAsc: false,
-            tableSearchFilter: "",
-            
-            // Pending uploaded CSV records
-            uploadedRecords: null
+            geoLayer: null,
+            timeseriesChart: null,
+            allocationChart: null
+        };
+
+        const DISEASE_COLORS = {
+            dengue: "#ef5350",
+            diarrhoea: "#38bdf8",
+            influenza: "#10b981",
+            malaria: "#f59e0b",
+            all: "#a855f7"
         };
 
         // ══════════════════════════════════════════════════════════════════
-        // Color Palettes & Scales for Choropleth
-        // ══════════════════════════════════════════════════════════════════
-        const ColorScales = {
-            // Blues: for Literacy, Rainfall
-            Blues: ["#f7fbff", "#deebf7", "#c6dbef", "#9ecae1", "#6baed6", "#4292c6", "#2171b5", "#08519c", "#08306b"],
-            // YlOrRd: for Population, Density
-            YlOrRd: ["#ffffcc", "#ffeda0", "#fed976", "#feb24c", "#fd8d3c", "#fc4e2a", "#e31a1c", "#bd0026", "#800026"],
-            // OrRd: for Poverty, Unemployment
-            OrRd: ["#fff5f0", "#fee0d2", "#fcbba1", "#fc9272", "#fb6a4a", "#ef3b2c", "#cb181d", "#a50f15", "#67000d"],
-            // Greens: for Forest, Hospital beds
-            Greens: ["#f7fcf5", "#e5f5e0", "#c7e9c0", "#a1d99b", "#74c476", "#41ab5d", "#238b45", "#006d2c", "#00441b"],
-            // Purples: for Electricity, Internet
-            Purples: ["#fcfbfd", "#efedf5", "#dadaeb", "#bcbddc", "#9e9ac8", "#807dba", "#6a51a3", "#54278f", "#3f007d"]
-        };
-
-        // ══════════════════════════════════════════════════════════════════
-        // Initialization
+        // Initialization & Data Loading (VIS-4 Payload)
         // ══════════════════════════════════════════════════════════════════
         document.addEventListener("DOMContentLoaded", async () => {
-            applyTheme(AppState.theme);
+            applyTheme(EpiState.theme);
             initEvents();
             initMap();
-            await loadData();
+            await loadEpiData();
         });
 
-        // ── Theme Manager ──
         function applyTheme(theme) {
-            AppState.theme = theme;
+            EpiState.theme = theme;
             document.documentElement.setAttribute("data-theme", theme);
-            localStorage.setItem("bd_dash_theme", theme);
-            
+            localStorage.setItem("episcope_theme", theme);
+
             const sunIcon = document.getElementById("theme-icon-sun");
             const moonIcon = document.getElementById("theme-icon-moon");
             if (theme === "light") {
@@ -1529,661 +1106,306 @@
                 moonIcon.style.display = "block";
             }
 
-            // Update Leaflet Tiles if needed
-            if (AppState.map) {
-                updateBasemap(document.getElementById("sel-basemap").value);
-            }
-            // Update Chart.js themes
-            updateCharts();
+            if (EpiState.timeseriesChart) updateTimeSeriesChart();
+            if (EpiState.allocationChart) updateAllocationChart();
         }
 
-        // ── Load Geographic & Statistical Data ──
-        async function loadData() {
+        async function loadEpiData() {
+            const base = "data/";
             try {
-                // Fetch GeoJSON (64 districts) and Indicators JSON
-                const [geoRes, indRes] = await Promise.all([
-                    fetch("data/bangladesh_districts.geojson"),
-                    fetch("data/district_indicators.json")
+                const [geo, ts, alerts, forecasts, allocation, districts, dqReport, calSummary] = await Promise.all([
+                    fetch(base + "bangladesh_districts.geojson").then(r => r.json()),
+                    fetch(base + "timeseries.json").then(r => r.json()).catch(() => []),
+                    fetch(base + "alerts.json").then(r => r.json()).catch(() => []),
+                    fetch(base + "forecasts.json").then(r => r.json()).catch(() => []),
+                    fetch(base + "allocation.json").then(r => r.json()).catch(() => []),
+                    fetch(base + "districts.json").then(r => r.json()).catch(() => []),
+                    fetch(base + "dq_report.json").then(r => r.json()).catch(() => null),
+                    fetch(base + "calendar_summary.json").then(r => r.json()).catch(() => ({}))
                 ]);
 
-                if (!geoRes.ok || !indRes.ok) {
-                    throw new Error("Failed to load local data files.");
-                }
+                EpiState.data.geo = geo;
+                EpiState.data.timeseries = ts;
+                EpiState.data.alerts = alerts;
+                EpiState.data.forecasts = forecasts;
+                EpiState.data.allocation = allocation;
+                EpiState.data.districts = districts;
+                EpiState.data.dqReport = dqReport;
+                EpiState.data.calendarSummary = calSummary;
 
-                AppState.geoData = await geoRes.json();
-                AppState.indicatorData = await indRes.json();
+                console.log(`Loaded ${geo.features.length} GeoJSON boundaries, ${ts.length} timeseries, ${alerts.length} alerts.`);
 
-                console.log(`Loaded ${AppState.geoData.features.length} GeoJSON districts and ${AppState.indicatorData.records.length} records.`);
-
-                // Populate search dropdown and comparison selectors
-                populateDropdowns();
-
-                // Render Map Layers
-                renderMapLayers();
-
-                // Update Overview & Top Cards
-                updateDashboard();
+                populateDistrictSelect();
+                setupSearchAutocomplete();
+                renderMapLayer();
+                renderAllViews();
 
             } catch (err) {
-                console.error("Data load error:", err);
-                alert("Failed to load district data. Please ensure dashboard/data files exist.");
+                console.error("EpiScope data load error:", err);
             }
         }
 
         // ══════════════════════════════════════════════════════════════════
-        // Map Implementation (Leaflet.js)
+        // View 1: Leaflet 64-District Geographic Vector Map
         // ══════════════════════════════════════════════════════════════════
         function initMap() {
-            // Bangladesh center coordinates: 23.6850° N, 90.3563° E
-            AppState.map = L.map("leaflet-map", {
+            EpiState.map = L.map("leaflet-map", {
                 center: [23.85, 90.25],
                 zoom: 7,
                 minZoom: 6,
-                maxZoom: 14,
+                maxZoom: 12,
                 zoomControl: true,
                 attributionControl: false
             });
 
-            // Set initial basemap
-            updateBasemap("dark");
+            // Clean high-contrast dark tile layer
+            L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+                maxZoom: 19
+            }).addTo(EpiState.map);
         }
 
-        function updateBasemap(style) {
-            if (AppState.baseTileLayer) {
-                AppState.map.removeLayer(AppState.baseTileLayer);
-            }
-
-            if (style === "dark") {
-                AppState.baseTileLayer = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-                    maxZoom: 19
-                }).addTo(AppState.map);
-            } else if (style === "light") {
-                AppState.baseTileLayer = L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
-                    maxZoom: 19
-                }).addTo(AppState.map);
-            } else if (style === "osm") {
-                AppState.baseTileLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-                    maxZoom: 19
-                }).addTo(AppState.map);
-            }
-            // "none" leaves background clean without external tile requests
+        function getFilteredTimeSeries() {
+            let data = EpiState.data.timeseries;
+            if (EpiState.disease !== "all") data = data.filter(d => d.disease === EpiState.disease);
+            if (EpiState.year !== "all") data = data.filter(d => String(d.epi_year) === EpiState.year);
+            if (EpiState.district !== "all") data = data.filter(d => d.district === EpiState.district);
+            if (EpiState.division !== "all") data = data.filter(d => d.division === EpiState.division);
+            return data;
         }
 
-        function getActiveRecordsMap() {
-            if (!AppState.indicatorData) return new Map();
-            const year = parseInt(AppState.activeYear, 10);
-            const m = new Map();
-            for (const r of AppState.indicatorData.records) {
-                if (r.year === year) {
-                    m.set(r.district_name, r);
-                }
-            }
-            return m;
+        function getFilteredAlerts() {
+            let data = EpiState.data.alerts;
+            if (EpiState.disease !== "all") data = data.filter(a => a.disease === EpiState.disease);
+            if (EpiState.year !== "all") data = data.filter(a => String(a.epi_year) === EpiState.year);
+            if (EpiState.district !== "all") data = data.filter(a => a.district === EpiState.district);
+            return data;
         }
 
-        function renderMapLayers() {
-            if (!AppState.geoData || !AppState.map) return;
+        function renderMapLayer() {
+            if (!EpiState.data.geo || !EpiState.map) return;
 
-            if (AppState.geoJsonLayer) {
-                AppState.map.removeLayer(AppState.geoJsonLayer);
+            if (EpiState.geoLayer) {
+                EpiState.map.removeLayer(EpiState.geoLayer);
             }
 
-            const recordsMap = getActiveRecordsMap();
-            const indKey = AppState.activeIndicator;
+            // Aggregate metrics by district
+            const ts = getFilteredTimeSeries();
+            const districtCases = new Map();
+            const districtIncidence = new Map();
 
-            // Compute Min / Max for choropleth scale
-            let vals = [];
-            for (const feat of AppState.geoData.features) {
-                const name = feat.properties.district_name;
-                const rec = recordsMap.get(name);
-                if (rec && rec[indKey] !== undefined && rec[indKey] !== null) {
-                    vals.push(Number(rec[indKey]));
-                }
+            for (const r of ts) {
+                const cur = districtCases.get(r.district) || 0;
+                districtCases.set(r.district, cur + (r.case_count || 0));
+                districtIncidence.set(r.district, r.incidence_per_100k || 0);
             }
 
-            const minVal = vals.length ? Math.min(...vals) : 0;
-            const maxVal = vals.length ? Math.max(...vals) : 1;
+            // Districts with active alerts
+            const alertDistricts = new Map();
+            for (const a of getFilteredAlerts()) {
+                const z = a.z_c2 || 0;
+                const prev = alertDistricts.get(a.district) || 0;
+                if (z > prev) alertDistricts.set(a.district, z);
+            }
 
-            // Pick color ramp based on indicator
-            let ramp = ColorScales.YlOrRd;
-            if (indKey.includes("lit") || indKey.includes("rain")) ramp = ColorScales.Blues;
-            else if (indKey.includes("pov") || indKey.includes("unemp")) ramp = ColorScales.OrRd;
-            else if (indKey.includes("forest") || indKey.includes("beds")) ramp = ColorScales.Greens;
-            else if (indKey.includes("elec") || indKey.includes("net")) ramp = ColorScales.Purples;
+            // Max value for scale
+            let maxVal = 1;
+            if (EpiState.mapMetric === "cases") {
+                maxVal = Math.max(1, ...districtCases.values());
+            } else if (EpiState.mapMetric === "incidence") {
+                maxVal = Math.max(1, ...districtIncidence.values());
+            } else {
+                maxVal = 4; // Z-score threshold
+            }
+
+            // Base color for disease
+            const baseColor = DISEASE_COLORS[EpiState.disease] || "#38bdf8";
 
             // Update Legend
-            updateLegend(minVal, maxVal, ramp);
+            updateMapLegend(maxVal, baseColor);
 
-            // GeoJSON Polygon Layer
-            AppState.geoJsonLayer = L.geoJSON(AppState.geoData, {
+            EpiState.geoLayer = L.geoJSON(EpiState.data.geo, {
                 style: function (feature) {
                     const name = feature.properties.district_name;
                     const div = feature.properties.division;
-                    const isSelected = AppState.selectedDistrict === name;
-                    const isDivMatch = AppState.activeDivision === "all" || AppState.activeDivision === div;
+                    const isSelected = EpiState.district === name;
+                    const isDivMatch = EpiState.division === "all" || EpiState.division === div;
 
-                    const rec = recordsMap.get(name);
-                    const val = rec ? rec[indKey] : null;
+                    let val = 0;
+                    if (EpiState.mapMetric === "cases") val = districtCases.get(name) || 0;
+                    else if (EpiState.mapMetric === "incidence") val = districtIncidence.get(name) || 0;
+                    else val = alertDistricts.get(name) || 0;
 
-                    let fillColor = "#2a3b5c";
-                    if (val !== null && val !== undefined && !isNaN(val)) {
-                        fillColor = getColorForValue(val, minVal, maxVal, ramp);
+                    const hasAlert = alertDistricts.has(name);
+                    const norm = Math.min(1, Math.max(0, val / maxVal));
+
+                    let fillColor = "#172033";
+                    if (val > 0) {
+                        fillColor = interpolateColor("#172033", baseColor, Math.max(0.2, norm));
                     }
 
                     if (!isDivMatch) {
-                        return {
-                            fillColor: "#1a2233",
-                            fillOpacity: 0.25,
-                            color: "#24324d",
-                            weight: 0.6
-                        };
+                        return { fillColor: "#0f172a", fillOpacity: 0.2, color: "#1e293b", weight: 0.5 };
                     }
 
                     return {
                         fillColor: fillColor,
-                        fillOpacity: isSelected ? 0.95 : 0.8,
-                        color: isSelected ? "#00d2ff" : (AppState.theme === "dark" ? "#233352" : "#94a3b8"),
-                        weight: isSelected ? 3.5 : 1.2,
-                        dashArray: isSelected ? "" : ""
+                        fillOpacity: isSelected ? 0.95 : (hasAlert ? 0.85 : 0.7),
+                        color: isSelected ? "#ffffff" : (hasAlert ? "#ef5350" : "#26334d"),
+                        weight: isSelected ? 3.5 : (hasAlert ? 2 : 1)
                     };
                 },
                 onEachFeature: function (feature, layer) {
                     const name = feature.properties.district_name;
                     const div = feature.properties.division;
+                    const cases = districtCases.get(name) || 0;
+                    const hasAlert = alertDistricts.has(name);
+                    const zScore = alertDistricts.get(name);
 
-                    // Hover Tooltip
+                    // Privacy small-cell suppression (< 5 shown as suppressed)
+                    const displayCases = (cases >= 1 && cases < 5) ? "<span style='color:#f59e0b;'>suppressed (&lt;5)</span>" : cases.toLocaleString();
+
                     layer.on("mouseover", function (e) {
-                        const rec = recordsMap.get(name);
-                        const val = rec && rec[indKey] !== undefined ? formatValue(rec[indKey], indKey) : "N/A";
-                        const pop = rec && rec.population ? rec.population.toLocaleString() : "N/A";
-
-                        const tooltipContent = `
-                            <div class="custom-district-tooltip">
-                                <div class="tt-header">${name}</div>
-                                <div class="tt-div">${div} Division • ${feature.properties.district_id}</div>
+                        const tt = `
+                            <div class="episcope-tooltip">
+                                <div class="tt-district">${name}</div>
+                                <div class="tt-div">${div} Division</div>
                                 <div class="tt-row">
-                                    <span class="tt-label">${getIndicatorLabel(indKey)}:</span>
-                                    <span class="tt-val">${val}</span>
+                                    <span style="color:var(--text-muted);">Observed Cases:</span>
+                                    <span class="tt-val" style="color:${baseColor};">${displayCases}</span>
                                 </div>
                                 <div class="tt-row">
-                                    <span class="tt-label">Population:</span>
-                                    <span class="tt-val">${pop}</span>
+                                    <span style="color:var(--text-muted);">Outbreak Status:</span>
+                                    <span class="tt-val" style="color:${hasAlert ? '#ef5350' : '#10b981'};">
+                                        ${hasAlert ? `⚠ Active Alert (Z=${zScore.toFixed(2)})` : "Normal"}
+                                    </span>
                                 </div>
                             </div>
                         `;
+                        layer.bindTooltip(tt, { sticky: true, direction: "top" }).openTooltip();
 
-                        layer.bindTooltip(tooltipContent, {
-                            sticky: true,
-                            direction: "top",
-                            className: "custom-leaflet-tooltip"
-                        }).openTooltip();
-
-                        // Highlight border on hover if not selected
-                        if (AppState.selectedDistrict !== name) {
-                            layer.setStyle({
-                                weight: 2.5,
-                                color: "#00d2ff",
-                                fillOpacity: 0.92
-                            });
+                        if (EpiState.district !== name) {
+                            layer.setStyle({ weight: 2.5, color: "#38bdf8", fillOpacity: 0.9 });
                         }
                     });
 
                     layer.on("mouseout", function (e) {
-                        if (AppState.selectedDistrict !== name) {
-                            AppState.geoJsonLayer.resetStyle(layer);
+                        if (EpiState.district !== name) {
+                            EpiState.geoLayer.resetStyle(layer);
                         }
                     });
 
-                    // District Click Handler
-                    layer.on("click", function (e) {
-                        selectDistrict(name);
+                    layer.on("click", function () {
+                        setDistrict(EpiState.district === name ? "all" : name);
                     });
                 }
-            }).addTo(AppState.map);
+            }).addTo(EpiState.map);
         }
 
-        function getColorForValue(val, min, max, ramp) {
-            if (min === max) return ramp[Math.floor(ramp.length / 2)];
-            const norm = Math.max(0, Math.min(1, (val - min) / (max - min)));
-            const idx = Math.min(ramp.length - 1, Math.floor(norm * ramp.length));
-            return ramp[idx];
+        function interpolateColor(color1, color2, factor) {
+            const c1 = parseInt(color1.slice(1), 16);
+            const c2 = parseInt(color2.slice(1), 16);
+            const r1 = (c1 >> 16) & 255, g1 = (c1 >> 8) & 255, b1 = c1 & 255;
+            const r2 = (c2 >> 16) & 255, g2 = (c2 >> 8) & 255, b2 = c2 & 255;
+            const r = Math.round(r1 + factor * (r2 - r1));
+            const g = Math.round(g1 + factor * (g2 - g1));
+            const b = Math.round(b1 + factor * (b2 - b1));
+            return `rgb(${r}, ${g}, ${b})`;
         }
 
-        function updateLegend(min, max, ramp) {
-            const legendBar = document.getElementById("legend-gradient");
-            const legendMin = document.getElementById("legend-min");
-            const legendMid = document.getElementById("legend-mid");
+        function updateMapLegend(maxVal, baseColor) {
+            const legendGrad = document.getElementById("legend-gradient");
+            const legendTitle = document.getElementById("legend-title");
             const legendMax = document.getElementById("legend-max");
-            const legendTitle = document.getElementById("legend-indicator-label");
-            const legendUnit = document.getElementById("legend-unit-label");
 
-            legendTitle.textContent = getIndicatorLabel(AppState.activeIndicator);
-            legendUnit.textContent = getIndicatorUnit(AppState.activeIndicator);
-
-            legendBar.style.background = `linear-gradient(90deg, ${ramp.join(",")})`;
-            legendMin.textContent = formatValue(min, AppState.activeIndicator);
-            legendMid.textContent = formatValue((min + max) / 2, AppState.activeIndicator);
-            legendMax.textContent = formatValue(max, AppState.activeIndicator);
+            legendGrad.style.background = `linear-gradient(90deg, #1e293b, ${baseColor})`;
+            legendTitle.textContent = EpiState.mapMetric === "cases" ? "Weekly Case Burden" : (EpiState.mapMetric === "incidence" ? "Incidence / 100k" : "EARS Z-Score");
+            legendMax.textContent = maxVal.toLocaleString();
         }
 
         // ══════════════════════════════════════════════════════════════════
-        // Selection & Zoom Handlers
+        // View 2: Epidemiological Timeline & Forecasts (AN-4, VIS-2)
         // ══════════════════════════════════════════════════════════════════
-        function selectDistrict(districtName) {
-            AppState.selectedDistrict = districtName;
+        function updateTimeSeriesChart() {
+            const ctx = document.getElementById("chart-timeseries").getContext("2d");
+            const ts = getFilteredTimeSeries();
+            const color = DISEASE_COLORS[EpiState.disease] || "#38bdf8";
 
-            // Highlight in Map
-            if (AppState.geoJsonLayer) {
-                AppState.geoJsonLayer.eachLayer(layer => {
-                    const isSelected = layer.feature.properties.district_name === districtName;
-                    if (isSelected) {
-                        layer.setStyle({
-                            weight: 3.5,
-                            color: "#00d2ff",
-                            fillOpacity: 0.95
-                        });
-                        layer.bringToFront();
-
-                        // Zoom to district bounds with smooth animation
-                        if (layer.feature.properties.bounds) {
-                            AppState.map.fitBounds(layer.feature.properties.bounds, {
-                                padding: [60, 60],
-                                maxZoom: 10,
-                                animate: true,
-                                duration: 0.8
-                            });
-                        }
-                    } else {
-                        AppState.geoJsonLayer.resetStyle(layer);
-                    }
-                });
+            // Group by epi_year-epi_week
+            const weekMap = new Map();
+            for (const r of ts) {
+                const key = `${r.epi_year}-W${String(r.epi_week).padStart(2, '0')}`;
+                weekMap.set(key, (weekMap.get(key) || 0) + (r.case_count || 0));
             }
 
-            // Sync with Table Selection
-            highlightTableRow(districtName);
+            const sortedKeys = Array.from(weekMap.keys()).sort();
+            const sampleKeys = sortedKeys.slice(-35); // Focus on recent trajectory
+            const actualValues = sampleKeys.map(k => weekMap.get(k) || 0);
 
-            // Update Statistics and Charts
-            updateDashboard();
-        }
+            // Forecasts (1-4 week horizon)
+            let fcList = EpiState.data.forecasts;
+            if (EpiState.disease !== "all") fcList = fcList.filter(f => f.disease === EpiState.disease);
+            if (EpiState.district !== "all") fcList = fcList.filter(f => f.district === EpiState.district);
 
-        function resetToNationalView() {
-            AppState.selectedDistrict = null;
-            AppState.activeDivision = "all";
+            // Forecast aggregated by horizon week
+            const fcMap = new Map();
+            const fcUpper = new Map();
+            const fcLower = new Map();
 
-            // Reset division pill active states
-            document.querySelectorAll(".div-pill").forEach(p => {
-                p.classList.toggle("active", p.dataset.division === "all");
-            });
-
-            // Reset Map View
-            if (AppState.map) {
-                AppState.map.setView([23.85, 90.25], 7, { animate: true, duration: 0.8 });
+            for (const f of fcList) {
+                const key = `${f.forecast_year}-W${String(f.forecast_week).padStart(2, '0')}`;
+                fcMap.set(key, (fcMap.get(key) || 0) + (f.point_forecast || 0));
+                fcUpper.set(key, (fcUpper.get(key) || 0) + (f.upper_80 || 0));
+                fcLower.set(key, (fcLower.get(key) || 0) + (f.lower_80 || 0));
             }
 
-            renderMapLayers();
-            highlightTableRow(null);
-            updateDashboard();
-        }
+            const fcKeys = Array.from(fcMap.keys()).sort();
+            const allLabels = [...sampleKeys, ...fcKeys];
 
-        // ══════════════════════════════════════════════════════════════════
-        // Dashboard Stats & KPI Updates
-        // ══════════════════════════════════════════════════════════════════
-        function updateDashboard() {
-            const recordsMap = getActiveRecordsMap();
-            const indKey = AppState.activeIndicator;
+            // Match arrays
+            const actualSeries = sampleKeys.map(k => weekMap.get(k) || 0);
+            const forecastSeries = Array(sampleKeys.length).fill(null).concat(fcKeys.map(k => fcMap.get(k)));
+            const upperSeries = Array(sampleKeys.length).fill(null).concat(fcKeys.map(k => fcUpper.get(k)));
+            const lowerSeries = Array(sampleKeys.length).fill(null).concat(fcKeys.map(k => fcLower.get(k)));
 
-            // 1. Top KPI Summary Cards
-            const selName = document.getElementById("card-selection-name");
-            const selSub = document.getElementById("card-selection-sub");
-            const selDivBadge = document.getElementById("badge-selection-div");
-            const popVal = document.getElementById("card-stat-population");
-            const popSub = document.getElementById("card-stat-pop-sub");
-            const densVal = document.getElementById("card-stat-density");
-            const densSub = document.getElementById("card-stat-density-sub");
-            const actIndName = document.getElementById("card-active-indicator-name");
-            const actIndVal = document.getElementById("card-active-val");
-            const actIndRank = document.getElementById("card-active-rank");
-            const actIndSub = document.getElementById("card-active-sub");
+            if (EpiState.timeseriesChart) EpiState.timeseriesChart.destroy();
 
-            actIndName.textContent = getIndicatorLabel(indKey);
-
-            if (!AppState.selectedDistrict) {
-                // National Overview State
-                selName.textContent = "All Bangladesh";
-                selSub.textContent = "National aggregate overview (64 districts)";
-                selDivBadge.textContent = AppState.activeDivision === "all" ? "National" : `${AppState.activeDivision} Division`;
-
-                // Calculate Totals
-                let totalPop = 0;
-                let totalArea = 0;
-                let indValues = [];
-
-                for (const r of recordsMap.values()) {
-                    if (AppState.activeDivision === "all" || r.division === AppState.activeDivision) {
-                        totalPop += (r.population || 0);
-                        totalArea += (r.area || 0);
-                        if (r[indKey] !== null && r[indKey] !== undefined) {
-                            indValues.push(Number(r[indKey]));
-                        }
-                    }
-                }
-
-                popVal.textContent = totalPop.toLocaleString();
-                popSub.textContent = AppState.activeDivision === "all" ? "Combined population" : `${AppState.activeDivision} total`;
-
-                const avgDensity = totalArea > 0 ? (totalPop / totalArea) : 0;
-                densVal.textContent = `${Math.round(avgDensity).toLocaleString()} / km²`;
-                densSub.textContent = `Across ${Math.round(totalArea).toLocaleString()} km² land area`;
-
-                const avgInd = indValues.length ? (indValues.reduce((a, b) => a + b, 0) / indValues.length) : 0;
-                actIndVal.textContent = formatValue(avgInd, indKey);
-                actIndRank.textContent = "National Avg";
-                actIndSub.textContent = `Average across ${indValues.length} districts`;
-
-                // Update Detailed Panel for National
-                updateDetailPanel(null);
-
-            } else {
-                // Specific District Selected
-                const dRec = recordsMap.get(AppState.selectedDistrict);
-                if (dRec) {
-                    selName.textContent = dRec.district_name;
-                    selSub.textContent = `${dRec.division} Division • HQ: ${dRec.headquarters || dRec.district_name}`;
-                    selDivBadge.textContent = dRec.district_id || "District";
-
-                    popVal.textContent = (dRec.population || 0).toLocaleString();
-                    popSub.textContent = `${((dRec.population / 170845000) * 100).toFixed(2)}% of national total`;
-
-                    densVal.textContent = `${Number(dRec.population_density).toLocaleString()} / km²`;
-                    densSub.textContent = `Area: ${Number(dRec.area).toLocaleString()} km²`;
-
-                    actIndVal.textContent = formatValue(dRec[indKey], indKey);
-                    
-                    // Compute Rank for this indicator
-                    const rankInfo = computeDistrictRank(AppState.selectedDistrict, indKey);
-                    actIndRank.textContent = `Rank #${rankInfo.rank} of 64`;
-                    actIndSub.textContent = rankInfo.betterThan;
-
-                    updateDetailPanel(dRec);
-                }
-            }
-
-            // Update Dynamic Visualizations
-            updateCharts();
-            renderTable();
-        }
-
-        function updateDetailPanel(record) {
-            const nameEl = document.getElementById("detail-district-name");
-            const divEl = document.getElementById("detail-division-name");
-            const idEl = document.getElementById("detail-district-id");
-            const hqEl = document.getElementById("detail-district-hq");
-            const deselectBtn = document.getElementById("btn-deselect-district");
-
-            const kpiArea = document.getElementById("detail-kpi-area");
-            const kpiPop = document.getElementById("detail-kpi-pop");
-            const kpiDensity = document.getElementById("detail-kpi-density");
-            const kpiLit = document.getElementById("detail-kpi-lit");
-            const kpiPov = document.getElementById("detail-kpi-pov");
-            const kpiBeds = document.getElementById("detail-kpi-beds");
-
-            if (!record) {
-                nameEl.textContent = "Bangladesh Overview";
-                divEl.textContent = "All 8 Divisions";
-                idEl.textContent = "BD-NATIONAL";
-                hqEl.textContent = "Dhaka (Capital)";
-                deselectBtn.style.display = "none";
-
-                kpiArea.textContent = "147,570 km²";
-                kpiPop.textContent = "170.8M";
-                kpiDensity.textContent = "1,158 / km²";
-                kpiLit.textContent = "76.5%";
-                kpiPov.textContent = "18.7%";
-                kpiBeds.textContent = "8.8 / 10k";
-            } else {
-                nameEl.textContent = `${record.district_name} District`;
-                divEl.textContent = record.division;
-                idEl.textContent = record.district_id || "N/A";
-                hqEl.textContent = record.headquarters || record.district_name;
-                deselectBtn.style.display = "inline-flex";
-
-                kpiArea.textContent = `${Number(record.area).toLocaleString()} km²`;
-                kpiPop.textContent = `${(record.population / 1000000).toFixed(2)}M`;
-                kpiDensity.textContent = `${Number(record.population_density).toLocaleString()} / km²`;
-                kpiLit.textContent = record.literacy_rate ? `${record.literacy_rate}%` : "N/A";
-                kpiPov.textContent = record.poverty_rate ? `${record.poverty_rate}%` : "N/A";
-                kpiBeds.textContent = record.hospital_beds_per_10k ? `${record.hospital_beds_per_10k}` : "N/A";
-            }
-        }
-
-        function computeDistrictRank(districtName, indKey) {
-            const recordsMap = getActiveRecordsMap();
-            const list = [];
-            for (const r of recordsMap.values()) {
-                if (r[indKey] !== null && r[indKey] !== undefined) {
-                    list.push({ name: r.district_name, val: Number(r[indKey]) });
-                }
-            }
-
-            // Determine if higher is better or worse
-            const higherIsWorse = indKey.includes("pov") || indKey.includes("unemp");
-            list.sort((a, b) => higherIsWorse ? a.val - b.val : b.val - a.val);
-
-            const rank = list.findIndex(item => item.name === districtName) + 1;
-            const percentile = Math.round(((list.length - rank) / list.length) * 100);
-
-            return {
-                rank: rank > 0 ? rank : "N/A",
-                betterThan: `Top ${Math.max(1, 100 - percentile)}% nationally`
-            };
-        }
-
-        // ══════════════════════════════════════════════════════════════════
-        // Charts Implementation (Chart.js)
-        // ══════════════════════════════════════════════════════════════════
-        function updateCharts() {
-            if (!AppState.indicatorData) return;
-
-            const isDark = AppState.theme === "dark";
-            const textMain = isDark ? "#f1f5f9" : "#0f172a";
-            const textMuted = isDark ? "#94a3b8" : "#475569";
-            const gridColor = isDark ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.06)";
-
-            const recordsMap = getActiveRecordsMap();
-            const targetDistrict = AppState.selectedDistrict || "Dhaka";
-            const distRecord = recordsMap.get(targetDistrict);
-
-            // 1. Radar Chart (District vs National Avg across 5 dimensions)
-            updateRadarChart(distRecord, isDark, textMain, textMuted, gridColor);
-
-            // 2. Bar Chart (Top 5 vs Bottom 5 or Division Peers)
-            updateBarChart(isDark, textMain, textMuted, gridColor);
-
-            // 3. Line Chart (5-Year Historical & Projected Trend 2021-2025)
-            updateLineChart(targetDistrict, isDark, textMain, textMuted, gridColor);
-        }
-
-        function updateRadarChart(record, isDark, textMain, textMuted, gridColor) {
-            const ctx = document.getElementById("chart-radar").getContext("2d");
-            const badge = document.getElementById("badge-radar-dist");
-            badge.textContent = record ? record.district_name : "Dhaka (Reference)";
-
-            // 5 Dimensions: Literacy (0-100), Poverty inverted (100 - pov), Beds (scaled), Electricity, Internet
-            const nationalAverages = [76.5, 81.3, 50, 96.0, 48.0];
-            
-            let distValues = [76.5, 81.3, 50, 96.0, 48.0];
-            if (record) {
-                distValues = [
-                    record.literacy_rate || 70,
-                    Math.max(0, 100 - (record.poverty_rate || 20)),
-                    Math.min(100, ((record.hospital_beds_per_10k || 8) / 20) * 100),
-                    record.electricity_access_pct || 90,
-                    record.internet_penetration_pct || 40
-                ];
-            }
-
-            if (AppState.radarChart) AppState.radarChart.destroy();
-
-            AppState.radarChart = new Chart(ctx, {
-                type: "radar",
-                data: {
-                    labels: ["Education (Literacy)", "Economy (Non-Poverty)", "Healthcare (Beds)", "Power Grid", "Digital Connectivity"],
-                    datasets: [
-                        {
-                            label: record ? record.district_name : "Selected District",
-                            data: distValues,
-                            borderColor: "#00d2ff",
-                            backgroundColor: "rgba(0, 210, 255, 0.25)",
-                            borderWidth: 2,
-                            pointBackgroundColor: "#00d2ff"
-                        },
-                        {
-                            label: "National Benchmark",
-                            data: nationalAverages,
-                            borderColor: isDark ? "rgba(255, 255, 255, 0.4)" : "rgba(0, 0, 0, 0.3)",
-                            backgroundColor: "transparent",
-                            borderWidth: 1.5,
-                            borderDash: [4, 4],
-                            pointRadius: 2
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        r: {
-                            angleLines: { color: gridColor },
-                            grid: { color: gridColor },
-                            pointLabels: { color: textMuted, font: { size: 10, weight: 600 } },
-                            ticks: { display: false, min: 0, max: 100 }
-                        }
-                    },
-                    plugins: {
-                        legend: { position: "bottom", labels: { color: textMain, font: { size: 11 } } }
-                    }
-                }
-            });
-        }
-
-        function updateBarChart(isDark, textMain, textMuted, gridColor) {
-            const ctx = document.getElementById("chart-bar").getContext("2d");
-            const recordsMap = getActiveRecordsMap();
-            const indKey = AppState.activeIndicator;
-            const barTitle = document.getElementById("title-bar-chart");
-
-            // Collect and sort all districts by current indicator
-            const list = [];
-            for (const r of recordsMap.values()) {
-                if (r[indKey] !== null && r[indKey] !== undefined) {
-                    list.push({ name: r.district_name, val: Number(r[indKey]), div: r.division });
-                }
-            }
-            list.sort((a, b) => b.val - a.val);
-
-            let chartData = [];
-            let chartLabels = [];
-            let chartColors = [];
-
-            if (AppState.selectedDistrict) {
-                // Show selected district + 4 closest division peers
-                const sel = list.find(x => x.name === AppState.selectedDistrict);
-                const selDiv = sel ? sel.div : "Dhaka";
-                barTitle.textContent = `${getIndicatorLabel(indKey)}: ${AppState.selectedDistrict} vs ${selDiv} Peers`;
-
-                const divPeers = list.filter(x => x.div === selDiv).slice(0, 7);
-                for (const p of divPeers) {
-                    chartLabels.push(p.name);
-                    chartData.push(p.val);
-                    chartColors.push(p.name === AppState.selectedDistrict ? "#00d2ff" : (isDark ? "#2a3b5c" : "#94a3b8"));
-                }
-            } else {
-                // Show Top 4 and Bottom 4 nationally
-                barTitle.textContent = `${getIndicatorLabel(indKey)}: Top 4 vs Bottom 4 Districts`;
-                const top4 = list.slice(0, 4);
-                const bottom4 = list.slice(-4);
-                const combined = [...top4, ...bottom4];
-
-                for (const item of combined) {
-                    chartLabels.push(item.name);
-                    chartData.push(item.val);
-                    chartColors.push(top4.includes(item) ? "#10b981" : "#f43f5e");
-                }
-            }
-
-            if (AppState.barChart) AppState.barChart.destroy();
-
-            AppState.barChart = new Chart(ctx, {
-                type: "bar",
-                data: {
-                    labels: chartLabels,
-                    datasets: [{
-                        label: getIndicatorLabel(indKey),
-                        data: chartData,
-                        backgroundColor: chartColors,
-                        borderRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
-                    },
-                    scales: {
-                        x: { grid: { display: false }, ticks: { color: textMuted, font: { size: 10 } } },
-                        y: { grid: { color: gridColor }, ticks: { color: textMuted, font: { size: 10 } } }
-                    }
-                }
-            });
-        }
-
-        function updateLineChart(districtName, isDark, textMain, textMuted, gridColor) {
-            const ctx = document.getElementById("chart-line").getContext("2d");
-            const indKey = AppState.activeIndicator;
-
-            // Gather 2021-2025 records for this district
-            const years = [2021, 2022, 2023, 2024, 2025];
-            const distTrend = [];
-            const natTrend = [];
-
-            for (const y of years) {
-                // District val
-                const dRec = AppState.indicatorData.records.find(r => r.district_name === districtName && r.year === y);
-                distTrend.push(dRec && dRec[indKey] !== undefined ? dRec[indKey] : null);
-
-                // National Avg for year
-                const yVals = AppState.indicatorData.records.filter(r => r.year === y && r[indKey] !== null).map(r => r[indKey]);
-                const yAvg = yVals.length ? yVals.reduce((a, b) => a + b, 0) / yVals.length : null;
-                natTrend.push(yAvg);
-            }
-
-            if (AppState.lineChart) AppState.lineChart.destroy();
-
-            AppState.lineChart = new Chart(ctx, {
+            EpiState.timeseriesChart = new Chart(ctx, {
                 type: "line",
                 data: {
-                    labels: years.map(String),
+                    labels: allLabels,
                     datasets: [
                         {
-                            label: districtName,
-                            data: distTrend,
-                            borderColor: "#00d2ff",
-                            backgroundColor: "rgba(0, 210, 255, 0.15)",
-                            borderWidth: 2.5,
+                            label: "Observed Cases",
+                            data: actualSeries,
+                            borderColor: color,
+                            backgroundColor: color + "22",
+                            borderWidth: 2,
                             fill: true,
-                            tension: 0.3,
-                            pointRadius: 4,
-                            pointBackgroundColor: "#00d2ff"
+                            tension: 0.25,
+                            pointRadius: 2
                         },
                         {
-                            label: "National Benchmark",
-                            data: natTrend,
-                            borderColor: isDark ? "rgba(255, 255, 255, 0.35)" : "rgba(0, 0, 0, 0.3)",
-                            borderWidth: 1.5,
+                            label: "1–4 Wk Point Forecast",
+                            data: forecastSeries,
+                            borderColor: "#f59e0b",
+                            borderWidth: 2,
                             borderDash: [5, 5],
-                            tension: 0.3,
-                            pointRadius: 2,
+                            pointRadius: 3,
+                            fill: false
+                        },
+                        {
+                            label: "80% Upper Bound",
+                            data: upperSeries,
+                            borderColor: "transparent",
+                            backgroundColor: "rgba(245, 158, 11, 0.15)",
+                            fill: "+1",
+                            pointRadius: 0
+                        },
+                        {
+                            label: "80% Lower Bound",
+                            data: lowerSeries,
+                            borderColor: "transparent",
+                            pointRadius: 0,
                             fill: false
                         }
                     ]
@@ -2192,213 +1414,331 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: "top", labels: { color: textMain, font: { size: 11 } } }
+                        legend: { position: "top", labels: { color: "#94a3b8", font: { size: 10 } } }
                     },
                     scales: {
-                        x: { grid: { color: gridColor }, ticks: { color: textMuted } },
-                        y: { grid: { color: gridColor }, ticks: { color: textMuted } }
+                        x: { ticks: { color: "#64748b", font: { size: 9 }, maxTicksLimit: 12 }, grid: { display: false } },
+                        y: { ticks: { color: "#64748b", font: { size: 9 } }, grid: { color: "rgba(255,255,255,0.06)" } }
                     }
                 }
             });
         }
 
         // ══════════════════════════════════════════════════════════════════
-        // Ranking Table Implementation
+        // View 3: Seasonal Outbreak Heatmap (AN-9)
         // ══════════════════════════════════════════════════════════════════
-        function renderTable() {
-            const tbody = document.getElementById("table-body");
-            tbody.innerHTML = "";
+        function updateSeasonalHeatmap() {
+            const grid = document.getElementById("heatmap-grid");
+            grid.innerHTML = "";
 
-            const recordsMap = getActiveRecordsMap();
-            let rows = [];
+            const ts = getFilteredTimeSeries();
+            const weekTotals = Array(53).fill(0);
 
-            for (const feat of AppState.geoData.features) {
-                const name = feat.properties.district_name;
-                const div = feat.properties.division;
-                const rec = recordsMap.get(name) || {};
-
-                // Filter by Division
-                if (AppState.activeDivision !== "all" && div !== AppState.activeDivision) {
-                    continue;
+            for (const r of ts) {
+                if (r.epi_week >= 1 && r.epi_week <= 52) {
+                    weekTotals[r.epi_week] += (r.case_count || 0);
                 }
-
-                // Filter by Search Query
-                if (AppState.tableSearchFilter) {
-                    const q = AppState.tableSearchFilter.toLowerCase();
-                    if (!name.toLowerCase().includes(q) && !div.toLowerCase().includes(q)) {
-                        continue;
-                    }
-                }
-
-                rows.push({
-                    district_name: name,
-                    division: div,
-                    district_id: feat.properties.district_id,
-                    population: rec.population || null,
-                    area: rec.area || feat.properties.area_sq_km || null,
-                    population_density: rec.population_density || null,
-                    literacy_rate: rec.literacy_rate || null,
-                    poverty_rate: rec.poverty_rate || null,
-                    unemployment_rate: rec.unemployment_rate || null,
-                    hospital_beds_per_10k: rec.hospital_beds_per_10k || null
-                });
             }
 
-            // Sort rows
-            const sortKey = AppState.tableSortKey;
-            const sortAsc = AppState.tableSortAsc;
-            rows.sort((a, b) => {
-                let vA = a[sortKey];
-                let vB = b[sortKey];
-                if (vA === null || vA === undefined) return 1;
-                if (vB === null || vB === undefined) return -1;
-                if (typeof vA === "string") {
-                    return sortAsc ? vA.localeCompare(vB) : vB.localeCompare(vA);
+            const maxW = Math.max(1, ...weekTotals);
+            const baseColor = DISEASE_COLORS[EpiState.disease] || "#38bdf8";
+
+            for (let w = 1; w <= 52; w++) {
+                const cases = weekTotals[w];
+                const intensity = cases / maxW;
+
+                const cell = document.createElement("div");
+                cell.className = "heat-cell";
+                cell.title = `Epi-Week ${w}: ${cases.toLocaleString()} cases`;
+
+                if (cases === 0) {
+                    cell.style.backgroundColor = "#1e293b";
+                } else if (intensity > 0.6) {
+                    cell.style.backgroundColor = "#ef5350"; // Surge
+                } else if (intensity > 0.25) {
+                    cell.style.backgroundColor = "#f59e0b"; // Moderate
+                } else {
+                    cell.style.backgroundColor = baseColor + "66";
                 }
-                return sortAsc ? vA - vB : vB - vA;
+
+                cell.addEventListener("mouseover", () => {
+                    document.getElementById("heatmap-selected-info").textContent =
+                        `Epi-Week ${w}: ${cases.toLocaleString()} cases (${intensity > 0.6 ? 'High Surge Risk' : (intensity > 0.25 ? 'Moderate' : 'Baseline')})`;
+                });
+
+                grid.appendChild(cell);
+            }
+        }
+
+        // ══════════════════════════════════════════════════════════════════
+        // View 4: LP Resource Allocation (AN-7)
+        // ══════════════════════════════════════════════════════════════════
+        function updateAllocationChart() {
+            const ctx = document.getElementById("chart-allocation").getContext("2d");
+            const alloc = EpiState.data.allocation;
+
+            let filtered = alloc;
+            if (EpiState.district !== "all") {
+                filtered = alloc.filter(d => d.district === EpiState.district);
+            }
+
+            // Top 10 districts by allocated volume
+            const distMap = new Map();
+            for (const r of filtered) {
+                const cur = distMap.get(r.district) || { allocated: 0, unmet: 0 };
+                cur.allocated += (r.allocated || 0);
+                cur.unmet += (r.unmet || 0);
+                distMap.set(r.district, cur);
+            }
+
+            const sorted = Array.from(distMap.entries()).sort((a, b) => b[1].allocated - a[1].allocated).slice(0, 8);
+
+            const labels = sorted.map(s => s[0]);
+            const allocatedData = sorted.map(s => s[1].allocated);
+            const unmetData = sorted.map(s => s[1].unmet);
+
+            if (EpiState.allocationChart) EpiState.allocationChart.destroy();
+
+            EpiState.allocationChart = new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: "Allocated Supplies",
+                            data: allocatedData,
+                            backgroundColor: "#10b981",
+                            borderRadius: 4
+                        },
+                        {
+                            label: "Unmet Demand",
+                            data: unmetData,
+                            backgroundColor: "#ef5350",
+                            borderRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: "top", labels: { color: "#94a3b8", font: { size: 10 } } }
+                    },
+                    scales: {
+                        x: { ticks: { color: "#64748b", font: { size: 10 } }, grid: { display: false } },
+                        y: { ticks: { color: "#64748b", font: { size: 10 } }, grid: { color: "rgba(255,255,255,0.06)" } }
+                    }
+                }
             });
+        }
 
-            // Populate DOM
-            rows.forEach((r, idx) => {
+        // ══════════════════════════════════════════════════════════════════
+        // View 5: Outbreak Detection Alert Feed (AN-1)
+        // ══════════════════════════════════════════════════════════════════
+        function updateAlertsFeed() {
+            const tbody = document.getElementById("alerts-tbody");
+            tbody.innerHTML = "";
+
+            const alerts = getFilteredAlerts().sort((a, b) => (b.z_c2 || 0) - (a.z_c2 || 0)).slice(0, 40);
+
+            document.getElementById("badge-total-alerts").textContent = `${alerts.length} Alerts`;
+            document.getElementById("kpi-alert-count").textContent = alerts.length;
+
+            if (alerts.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:20px; color:var(--text-muted);">No active outbreak alerts for current selection.</td></tr>`;
+                return;
+            }
+
+            for (const a of alerts) {
                 const tr = document.createElement("tr");
-                tr.dataset.district = r.district_name;
-                if (AppState.selectedDistrict === r.district_name) {
-                    tr.classList.add("selected-row");
-                }
-
-                const rankClass = idx < 3 ? "rank-badge top-3" : "rank-badge";
+                const z = a.z_c2 || 0;
+                const severity = z > 3.0 ? "high" : (z > 2.0 ? "medium" : "low");
 
                 tr.innerHTML = `
-                    <td><span class="${rankClass}">${idx + 1}</span></td>
-                    <td><strong>${r.district_name}</strong> <span style="font-size:10px; color:var(--text-faint);">(${r.district_id})</span></td>
-                    <td><span class="stat-tag">${r.division}</span></td>
-                    <td>${r.population ? r.population.toLocaleString() : "N/A"}</td>
-                    <td>${r.area ? Number(r.area).toLocaleString() : "N/A"}</td>
-                    <td><strong>${r.population_density ? Number(r.population_density).toLocaleString() : "N/A"}</strong></td>
-                    <td>${r.literacy_rate ? r.literacy_rate + "%" : "N/A"}</td>
-                    <td>${r.poverty_rate ? r.poverty_rate + "%" : "N/A"}</td>
-                    <td>${r.unemployment_rate ? r.unemployment_rate + "%" : "N/A"}</td>
-                    <td>${r.hospital_beds_per_10k ? r.hospital_beds_per_10k : "N/A"}</td>
-                    <td>
-                        <button class="btn" style="padding: 2px 8px; font-size: 11px;" onclick="selectDistrict('${r.district_name}')">
-                            Locate
-                        </button>
-                    </td>
+                    <td><span class="severity-badge ${severity}">Z=${z.toFixed(2)}</span></td>
+                    <td><strong>${a.district}</strong></td>
+                    <td><span class="stat-tag">${getDistrictDivision(a.district)}</span></td>
+                    <td style="color:${DISEASE_COLORS[a.disease] || '#fff'}; font-weight:700;">${a.disease.toUpperCase()}</td>
+                    <td>W${a.epi_week} (${a.epi_year})</td>
+                    <td>${a.case_count ? a.case_count.toLocaleString() : '—'}</td>
+                    <td>${z.toFixed(2)}</td>
+                    <td style="color:var(--text-faint);">${a.alert_ears_c3 ? 'EARS-C3' : (a.alert_ears_c2 ? 'EARS-C2' : 'CUSUM')}</td>
                 `;
 
-                tr.addEventListener("click", (e) => {
-                    if (e.target.tagName !== "BUTTON") {
-                        selectDistrict(r.district_name);
-                    }
+                tr.addEventListener("click", () => {
+                    setDistrict(a.district);
                 });
 
                 tbody.appendChild(tr);
-            });
+            }
         }
 
-        function highlightTableRow(districtName) {
-            const rows = document.querySelectorAll("#table-body tr");
-            rows.forEach(tr => {
-                if (districtName && tr.dataset.district === districtName) {
-                    tr.classList.add("selected-row");
-                    tr.scrollIntoView({ behavior: "smooth", block: "nearest" });
-                } else {
-                    tr.classList.remove("selected-row");
-                }
-            });
+        function getDistrictDivision(name) {
+            const d = EpiState.data.districts.find(x => x.district === name);
+            return d ? d.division : "Bangladesh";
         }
 
         // ══════════════════════════════════════════════════════════════════
-        // UI Events & Autocomplete
+        // Synchronized Dashboard Master Updates (VIS-1)
+        // ══════════════════════════════════════════════════════════════════
+        function renderAllViews() {
+            // Update Top KPIs
+            updateTopKPIs();
+
+            // Refresh Map
+            renderMapLayer();
+
+            // Refresh View 2, 3, 4, 5
+            updateTimeSeriesChart();
+            updateSeasonalHeatmap();
+            updateAllocationChart();
+            updateAlertsFeed();
+        }
+
+        function updateTopKPIs() {
+            const ts = getFilteredTimeSeries();
+            const cases = ts.reduce((acc, r) => acc + (r.case_count || 0), 0);
+
+            // District title
+            const nameEl = document.getElementById("kpi-district-name");
+            const subEl = document.getElementById("kpi-district-sub");
+            const divBadge = document.getElementById("badge-division-name");
+
+            if (EpiState.district === "all") {
+                nameEl.textContent = EpiState.division === "all" ? "All 64 Districts" : `${EpiState.division} Division`;
+                subEl.textContent = `All Bangladesh • 8 Administrative Divisions`;
+                divBadge.textContent = EpiState.division === "all" ? "National" : EpiState.division;
+            } else {
+                nameEl.textContent = `${EpiState.district} District`;
+                const div = getDistrictDivision(EpiState.district);
+                subEl.textContent = `${div} Division • Targeted Surveillance`;
+                divBadge.textContent = div;
+            }
+
+            // Case count with privacy small-cell suppression
+            const countEl = document.getElementById("kpi-case-count");
+            const disBadge = document.getElementById("badge-disease-name");
+            disBadge.textContent = EpiState.disease.toUpperCase();
+            disBadge.style.color = DISEASE_COLORS[EpiState.disease] || "#38bdf8";
+            disBadge.style.backgroundColor = (DISEASE_COLORS[EpiState.disease] || "#38bdf8") + "22";
+
+            if (cases >= 1 && cases < 5) {
+                countEl.innerHTML = `<span style="font-size:16px; color:#f59e0b;">&lt;5 (suppressed)</span>`;
+            } else {
+                countEl.textContent = cases.toLocaleString();
+            }
+
+            // 4-Wk Forecast demand
+            let fc = EpiState.data.forecasts;
+            if (EpiState.disease !== "all") fc = fc.filter(f => f.disease === EpiState.disease);
+            if (EpiState.district !== "all") fc = fc.filter(f => f.district === EpiState.district);
+
+            const beds = fc.reduce((acc, f) => acc + (f.demand_beds || 0), 0);
+            const saline = fc.reduce((acc, f) => acc + (f.demand_iv_saline || 0), 0);
+            document.getElementById("kpi-forecast-demand").textContent = `${Math.round(beds + saline).toLocaleString()} units`;
+            document.getElementById("kpi-forecast-sub").textContent = `Beds: ${Math.round(beds)} | IV Saline: ${Math.round(saline)}`;
+        }
+
+        function setDistrict(districtName) {
+            EpiState.district = districtName;
+            document.getElementById("sel-district").value = districtName;
+
+            // Zoom map to district bounds
+            if (districtName !== "all" && EpiState.geoLayer) {
+                EpiState.geoLayer.eachLayer(layer => {
+                    if (layer.feature.properties.district_name === districtName) {
+                        EpiState.map.fitBounds(layer.getBounds(), { padding: [60, 60], maxZoom: 10 });
+                        layer.bringToFront();
+                    }
+                });
+            } else if (districtName === "all" && EpiState.map) {
+                EpiState.map.setView([23.85, 90.25], 7);
+            }
+
+            renderAllViews();
+        }
+
+        // ══════════════════════════════════════════════════════════════════
+        // UI Controls & Event Listeners
         // ══════════════════════════════════════════════════════════════════
         function initEvents() {
-            // Theme Toggle
+            // Theme toggle
             document.getElementById("btn-toggle-theme").addEventListener("click", () => {
-                const next = AppState.theme === "dark" ? "light" : "dark";
-                applyTheme(next);
+                applyTheme(EpiState.theme === "dark" ? "light" : "dark");
             });
 
-            // Brand Logo -> Reset
-            document.getElementById("btn-brand-home").addEventListener("click", (e) => {
-                e.preventDefault();
-                resetToNationalView();
-            });
-
-            // Map Reset Button & Deselect Button
-            document.getElementById("btn-reset-map").addEventListener("click", resetToNationalView);
-            document.getElementById("btn-deselect-district").addEventListener("click", resetToNationalView);
-
-            // Indicator Change
-            document.getElementById("sel-indicator").addEventListener("change", (e) => {
-                AppState.activeIndicator = e.target.value;
-                renderMapLayers();
-                updateDashboard();
-            });
-
-            // Year Change
-            document.getElementById("sel-year").addEventListener("change", (e) => {
-                AppState.activeYear = parseInt(e.target.value, 10);
-                document.getElementById("badge-pop-year").textContent = `${AppState.activeYear} Est.`;
-                renderMapLayers();
-                updateDashboard();
-            });
-
-            // Basemap Style
-            document.getElementById("sel-basemap").addEventListener("change", (e) => {
-                updateBasemap(e.target.value);
-            });
-
-            // Division Filter Pills
-            document.getElementById("division-pills-container").addEventListener("click", (e) => {
-                const btn = e.target.closest(".div-pill");
+            // Disease filter buttons
+            document.getElementById("disease-pills").addEventListener("click", (e) => {
+                const btn = e.target.closest(".disease-btn");
                 if (!btn) return;
-                document.querySelectorAll(".div-pill").forEach(p => p.classList.remove("active"));
+                document.querySelectorAll(".disease-btn").forEach(b => b.classList.remove("active"));
                 btn.classList.add("active");
-
-                AppState.activeDivision = btn.dataset.division;
-                document.getElementById("table-div-filter").value = AppState.activeDivision;
-                renderMapLayers();
-                updateDashboard();
+                EpiState.disease = btn.dataset.disease;
+                renderAllViews();
             });
 
-            // Table Division Dropdown
-            document.getElementById("table-div-filter").addEventListener("change", (e) => {
-                AppState.activeDivision = e.target.value;
-                document.querySelectorAll(".div-pill").forEach(p => {
-                    p.classList.toggle("active", p.dataset.division === AppState.activeDivision);
+            // Year selector
+            document.getElementById("sel-year").addEventListener("change", (e) => {
+                EpiState.year = e.target.value;
+                renderAllViews();
+            });
+
+            // Division selector
+            document.getElementById("sel-division").addEventListener("change", (e) => {
+                EpiState.division = e.target.value;
+                renderAllViews();
+            });
+
+            // District selector
+            document.getElementById("sel-district").addEventListener("change", (e) => {
+                setDistrict(e.target.value);
+            });
+
+            // Map metric selector
+            document.getElementById("sel-map-metric").addEventListener("change", (e) => {
+                EpiState.mapMetric = e.target.value;
+                renderMapLayer();
+            });
+
+            // Reset Map Zoom
+            document.getElementById("btn-reset-map-zoom").addEventListener("click", () => {
+                setDistrict("all");
+            });
+
+            // Reset All Filters
+            document.getElementById("btn-reset-filters").addEventListener("click", () => {
+                EpiState.disease = "dengue";
+                EpiState.year = "2025";
+                EpiState.division = "all";
+                EpiState.district = "all";
+
+                document.querySelectorAll(".disease-btn").forEach(b => {
+                    b.classList.toggle("active", b.dataset.disease === "dengue");
                 });
-                renderMapLayers();
-                updateDashboard();
+                document.getElementById("sel-year").value = "2025";
+                document.getElementById("sel-division").value = "all";
+                document.getElementById("sel-district").value = "all";
+
+                setDistrict("all");
             });
 
-            // Table Search Input
-            document.getElementById("table-search-input").addEventListener("input", (e) => {
-                AppState.tableSearchFilter = e.target.value.trim();
-                renderTable();
+            document.getElementById("btn-brand-reset").addEventListener("click", (e) => {
+                e.preventDefault();
+                setDistrict("all");
             });
+        }
 
-            // Table Header Sorting
-            document.querySelectorAll("#district-ranking-table th[data-sort]").forEach(th => {
-                th.addEventListener("click", () => {
-                    const key = th.dataset.sort;
-                    if (AppState.tableSortKey === key) {
-                        AppState.tableSortAsc = !AppState.tableSortAsc;
-                    } else {
-                        AppState.tableSortKey = key;
-                        AppState.tableSortAsc = false; // default desc for numbers
-                    }
-                    renderTable();
-                });
-            });
+        function populateDistrictSelect() {
+            const sel = document.getElementById("sel-district");
+            sel.innerHTML = `<option value="all">All 64 Districts</option>`;
 
-            // CSV Table Export
-            document.getElementById("btn-export-csv").addEventListener("click", exportTableToCSV);
-
-            // Search Autocomplete Dropdown
-            setupSearchAutocomplete();
-
-            // Modals
-            setupModals();
+            const sorted = [...EpiState.data.districts].sort((a, b) => a.district.localeCompare(b.district));
+            for (const d of sorted) {
+                const opt = document.createElement("option");
+                opt.value = d.district;
+                opt.textContent = `${d.district} (${d.division})`;
+                sel.appendChild(opt);
+            }
         }
 
         function setupSearchAutocomplete() {
@@ -2406,25 +1746,23 @@
             const dropdown = document.getElementById("search-dropdown");
 
             input.addEventListener("input", () => {
-                const query = input.value.trim().toLowerCase();
-                if (!query) {
+                const q = input.value.trim().toLowerCase();
+                if (!q) {
                     dropdown.classList.remove("open");
                     return;
                 }
 
-                const matches = AppState.geoData.features.filter(f => {
-                    const name = f.properties.district_name.toLowerCase();
-                    const div = f.properties.division.toLowerCase();
-                    return name.includes(query) || div.includes(query);
-                });
+                const matches = EpiState.data.districts.filter(d =>
+                    d.district.toLowerCase().includes(q) || d.division.toLowerCase().includes(q)
+                );
 
                 if (matches.length === 0) {
                     dropdown.innerHTML = `<div style="padding:10px; font-size:12px; color:var(--text-muted);">No district found</div>`;
                 } else {
                     dropdown.innerHTML = matches.map(m => `
-                        <div class="search-item" data-district="${m.properties.district_name}">
-                            <span><strong>${m.properties.district_name}</strong></span>
-                            <span class="div-tag">${m.properties.division}</span>
+                        <div class="search-item" data-district="${m.district}">
+                            <span><strong>${m.district}</strong></span>
+                            <span class="stat-tag">${m.division}</span>
                         </div>
                     `).join("");
                 }
@@ -2435,10 +1773,10 @@
             dropdown.addEventListener("click", (e) => {
                 const item = e.target.closest(".search-item");
                 if (item) {
-                    const dName = item.dataset.district;
-                    input.value = dName;
+                    const name = item.dataset.district;
+                    input.value = name;
                     dropdown.classList.remove("open");
-                    selectDistrict(dName);
+                    setDistrict(name);
                 }
             });
 
@@ -2447,223 +1785,6 @@
                     dropdown.classList.remove("open");
                 }
             });
-        }
-
-        // ══════════════════════════════════════════════════════════════════
-        // Comparison & CSV Upload Modals
-        // ══════════════════════════════════════════════════════════════════
-        function populateDropdowns() {
-            const compA = document.getElementById("comp-sel-a");
-            const compB = document.getElementById("comp-sel-b");
-            compA.innerHTML = "";
-            compB.innerHTML = "";
-
-            const sorted = [...AppState.geoData.features].sort((a, b) => a.properties.district_name.localeCompare(b.properties.district_name));
-
-            sorted.forEach(f => {
-                const name = f.properties.district_name;
-                compA.appendChild(new Option(name, name));
-                compB.appendChild(new Option(name, name));
-            });
-
-            compA.value = "Dhaka";
-            compB.value = "Chattogram";
-        }
-
-        function setupModals() {
-            // Compare Modal
-            const modalCompare = document.getElementById("modal-compare");
-            document.getElementById("btn-open-compare").addEventListener("click", () => {
-                modalCompare.classList.add("active");
-                renderComparison();
-            });
-            document.getElementById("btn-close-compare").addEventListener("click", () => modalCompare.classList.remove("active"));
-            document.getElementById("btn-close-compare-footer").addEventListener("click", () => modalCompare.classList.remove("active"));
-
-            document.getElementById("comp-sel-a").addEventListener("change", renderComparison);
-            document.getElementById("comp-sel-b").addEventListener("change", renderComparison);
-
-            // Upload Modal
-            const modalUpload = document.getElementById("modal-upload");
-            const dropzone = document.getElementById("csv-dropzone");
-            const fileInput = document.getElementById("file-input-csv");
-            const applyBtn = document.getElementById("btn-apply-csv");
-
-            document.getElementById("btn-open-upload").addEventListener("click", () => modalUpload.classList.add("active"));
-            document.getElementById("btn-close-upload").addEventListener("click", () => modalUpload.classList.remove("active"));
-            document.getElementById("btn-cancel-upload").addEventListener("click", () => modalUpload.classList.remove("active"));
-
-            dropzone.addEventListener("click", () => fileInput.click());
-            dropzone.addEventListener("dragover", (e) => { e.preventDefault(); dropzone.classList.add("dragover"); });
-            dropzone.addEventListener("dragleave", () => dropzone.classList.remove("dragover"));
-            dropzone.addEventListener("drop", (e) => {
-                e.preventDefault();
-                dropzone.classList.remove("dragover");
-                if (e.dataTransfer.files.length) handleCSVFile(e.dataTransfer.files[0]);
-            });
-
-            fileInput.addEventListener("change", (e) => {
-                if (e.target.files.length) handleCSVFile(e.target.files[0]);
-            });
-
-            applyBtn.addEventListener("click", () => {
-                if (AppState.uploadedRecords) {
-                    AppState.indicatorData.records = AppState.uploadedRecords;
-                    modalUpload.classList.remove("active");
-                    renderMapLayers();
-                    updateDashboard();
-                    alert("Custom dataset successfully applied!");
-                }
-            });
-
-            document.getElementById("btn-reset-default-data").addEventListener("click", async () => {
-                const res = await fetch("data/district_indicators.json");
-                AppState.indicatorData = await res.json();
-                renderMapLayers();
-                updateDashboard();
-                modalUpload.classList.remove("active");
-                alert("Reset to official BBS Census data.");
-            });
-        }
-
-        function renderComparison() {
-            const dA = document.getElementById("comp-sel-a").value;
-            const dB = document.getElementById("comp-sel-b").value;
-            const grid = document.getElementById("comparison-result-grid");
-            const recordsMap = getActiveRecordsMap();
-
-            const rA = recordsMap.get(dA) || {};
-            const rB = recordsMap.get(dB) || {};
-
-            const indicators = [
-                { id: "population", label: "Population", fmt: n => n.toLocaleString() },
-                { id: "area", label: "Area (sq km)", fmt: n => Number(n).toLocaleString() + " km²" },
-                { id: "population_density", label: "Density", fmt: n => Number(n).toLocaleString() + " /km²" },
-                { id: "literacy_rate", label: "Literacy Rate", fmt: n => n + "%" },
-                { id: "poverty_rate", label: "Poverty Rate", fmt: n => n + "%" },
-                { id: "unemployment_rate", label: "Unemployment", fmt: n => n + "%" },
-                { id: "hospital_beds_per_10k", label: "Hospital Beds", fmt: n => n + " /10k" },
-                { id: "forest_coverage_pct", label: "Forest Coverage", fmt: n => n + "%" }
-            ];
-
-            grid.innerHTML = indicators.map(ind => {
-                const valA = rA[ind.id] !== undefined && rA[ind.id] !== null ? ind.fmt(rA[ind.id]) : "N/A";
-                const valB = rB[ind.id] !== undefined && rB[ind.id] !== null ? ind.fmt(rB[ind.id]) : "N/A";
-
-                return `
-                    <div class="comp-card">
-                        <div style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">${ind.label}</div>
-                        <div style="display:flex; justify-content:space-between; margin-top:8px;">
-                            <div>
-                                <span style="font-size:11px; color:var(--text-faint);">${dA}:</span>
-                                <div style="font-size:15px; font-weight:800; color:var(--primary);">${valA}</div>
-                            </div>
-                            <div style="text-align:right;">
-                                <span style="font-size:11px; color:var(--text-faint);">${dB}:</span>
-                                <div style="font-size:15px; font-weight:800; color:var(--accent-purple);">${valB}</div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join("");
-        }
-
-        function handleCSVFile(file) {
-            const statusEl = document.getElementById("upload-status");
-            const applyBtn = document.getElementById("btn-apply-csv");
-
-            Papa.parse(file, {
-                header: true,
-                dynamicTyping: true,
-                skipEmptyLines: true,
-                complete: function (results) {
-                    if (!results.data || results.data.length === 0) {
-                        statusEl.style.display = "block";
-                        statusEl.style.backgroundColor = "rgba(244, 63, 94, 0.2)";
-                        statusEl.style.color = "var(--accent-rose)";
-                        statusEl.textContent = "Error: Empty CSV file.";
-                        applyBtn.disabled = true;
-                        return;
-                    }
-
-                    // Check for required column
-                    const sample = results.data[0];
-                    if (!sample.district_name && !sample.district_id) {
-                        statusEl.style.display = "block";
-                        statusEl.style.backgroundColor = "rgba(244, 63, 94, 0.2)";
-                        statusEl.style.color = "var(--accent-rose)";
-                        statusEl.textContent = "Error: CSV must contain 'district_name' or 'district_id' column.";
-                        applyBtn.disabled = true;
-                        return;
-                    }
-
-                    AppState.uploadedRecords = results.data;
-                    statusEl.style.display = "block";
-                    statusEl.style.backgroundColor = "rgba(16, 185, 129, 0.2)";
-                    statusEl.style.color = "var(--accent-green)";
-                    statusEl.textContent = `Valid CSV parsed! Found ${results.data.length} records. Ready to apply.`;
-                    applyBtn.disabled = false;
-                }
-            });
-        }
-
-        function exportTableToCSV() {
-            const recordsMap = getActiveRecordsMap();
-            let csv = "Rank,District,District_ID,Division,Population,Area_sqkm,Density_per_sqkm,Literacy_Pct,Poverty_Pct,Unemployment_Pct,HospitalBeds_per_10k\n";
-
-            AppState.geoData.features.forEach((feat, idx) => {
-                const name = feat.properties.district_name;
-                const div = feat.properties.division;
-                const rec = recordsMap.get(name) || {};
-
-                csv += `"${idx + 1}","${name}","${feat.properties.district_id}","${div}",${rec.population || ""},${rec.area || ""},${rec.population_density || ""},${rec.literacy_rate || ""},${rec.poverty_rate || ""},${rec.unemployment_rate || ""},${rec.hospital_beds_per_10k || ""}\n`;
-            });
-
-            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `bangladesh_districts_${AppState.activeYear}.csv`;
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
-        // ══════════════════════════════════════════════════════════════════
-        // Format & Label Helpers
-        // ══════════════════════════════════════════════════════════════════
-        function getIndicatorLabel(id) {
-            const map = {
-                population: "Total Population",
-                population_density: "Population Density",
-                literacy_rate: "Literacy Rate (7+ yrs)",
-                poverty_rate: "Poverty Headcount",
-                unemployment_rate: "Unemployment Rate",
-                hospital_beds_per_10k: "Hospital Beds per 10k",
-                electricity_access_pct: "Electricity Access",
-                internet_penetration_pct: "Internet Penetration",
-                forest_coverage_pct: "Forest Coverage",
-                annual_rainfall_mm: "Annual Rainfall"
-            };
-            return map[id] || id;
-        }
-
-        function getIndicatorUnit(id) {
-            if (id === "population") return "people";
-            if (id === "population_density") return "/ km²";
-            if (id.includes("pct") || id.includes("rate")) return "%";
-            if (id === "annual_rainfall_mm") return "mm";
-            if (id.includes("beds")) return "beds";
-            return "";
-        }
-
-        function formatValue(val, id) {
-            if (val === null || val === undefined || isNaN(val)) return "N/A";
-            const num = Number(val);
-            if (id === "population") return Math.round(num).toLocaleString();
-            if (id === "population_density") return Math.round(num).toLocaleString() + " / km²";
-            if (id.includes("pct") || id.includes("rate")) return num.toFixed(1) + "%";
-            if (id === "annual_rainfall_mm") return Math.round(num).toLocaleString() + " mm";
-            return num.toFixed(1);
         }
     </script>
 </body>
