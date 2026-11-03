@@ -304,14 +304,43 @@ Execution Pipeline Workflow:
 
 ### 3. Launch the Interactive Dashboard
 
-Launch the local web server to explore the surveillance interface:
+Launch the local web server to explore the Bangladesh District Intelligence Dashboard:
 
 ```bash
 cd dashboard
 python -m http.server 8000 --bind 127.0.0.1
 ```
 
-👉 Navigate to **[http://127.0.0.1:8000](http://127.0.0.1:8000)** in your browser.
+👉 Navigate to **[http://127.0.0.1:8000](http://127.0.0.1:8000)** in your browser.  
+👉 Live Web App on GitHub Pages: **[https://riduanshihab.github.io/episcope/](https://riduanshihab.github.io/episcope/)**
+
+---
+
+## 🗺️ Bangladesh District Intelligence Dashboard
+
+The platform features a modern, fully interactive 64-district intelligence dashboard:
+
+- **All 64 Administrative Districts & 8 Divisions**: Geographically accurate GeoJSON vector boundaries (geoBoundaries ADM2 standard).
+- **Interactive Choropleth Map**:
+  - Dynamically color-coded by indicator: Population, Population Density, Literacy Rate, Poverty Headcount, Unemployment Rate, Hospital Beds, Electricity Access, Internet Penetration, Forest Coverage, Annual Rainfall.
+  - Multi-year trend support (2021–2025).
+  - Hover tooltips with district name, division, national ranking, and live indicator metric.
+  - Click-to-zoom with smooth bounding box camera transitions.
+- **Dynamic Multi-Chart Intelligence Panel**:
+  - **Radar Profile Chart**: 5-axis dimensional benchmark against the Bangladesh national average (Education, Economy, Healthcare, Power Grid, Connectivity).
+  - **Bar Benchmark Chart**: District vs. division peers & national baseline.
+  - **5-Year Trend Line Chart**: Historical and projected trajectory (2021–2025).
+- **Search & Division Filtering**:
+  - Instant district search with autocomplete dropdown and auto-zoom.
+  - Division filter pills (Dhaka, Chattogram, Rajshahi, Khulna, Barishal, Sylhet, Rangpur, Mymensingh).
+- **District Comparison**:
+  - Side-by-side comparative inspection of any two districts across all indicators.
+- **Custom CSV Upload & Export**:
+  - Drag-and-drop custom CSV dataset upload powered by PapaParse.
+  - Missing data handled strictly as `"N/A"` (never zero).
+  - One-click CSV export of currently sorted/filtered district rankings.
+- **Dual Dashboard Support**:
+  - Switch anytime between District Intelligence and EpiScope Epidemiological Surveillance (`episcope_surveillance.html`).
 
 ---
 
