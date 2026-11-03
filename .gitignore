@@ -1,0 +1,42 @@
+# Data files
+data/
+*.csv
+*.jsonl
+*.parquet
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# Environment
+.env
+*.env
+!.env.example
+
+# Spark
+spark-warehouse/
+metastore_db/
+derby.log
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Logs
+*.log
