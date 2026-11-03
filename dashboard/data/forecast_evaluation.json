@@ -1,0 +1,26 @@
+{
+  "dengue": {
+    "model_mae": 5.43,
+    "naive_mae": 13.8,
+    "coverage_80": 0.7594,
+    "skill_score": 0.6066
+  },
+  "influenza": {
+    "model_mae": 6.67,
+    "naive_mae": 16.12,
+    "coverage_80": 0.7495,
+    "skill_score": 0.5859
+  },
+  "diarrhoea": {
+    "model_mae": 9.23,
+    "naive_mae": 24.23,
+    "coverage_80": 0.7545,
+    "skill_score": 0.6191
+  },
+  "malaria": {
+    "model_mae": 0.51,
+    "naive_mae": 0.64,
+    "coverage_80": 0.1977,
+    "skill_score": 0.2003
+  }
+}

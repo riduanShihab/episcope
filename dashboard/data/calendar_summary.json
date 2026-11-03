@@ -1,0 +1,598 @@
+{
+  "Chattogram": {
+    "influenza": {
+      "peak_week": 11,
+      "trough_week": 41,
+      "high_risk_weeks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ]
+    },
+    "diarrhoea": {
+      "peak_week": 17,
+      "trough_week": 1,
+      "high_risk_weeks": [
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ]
+    },
+    "dengue": {
+      "peak_week": 31,
+      "trough_week": 50,
+      "high_risk_weeks": [
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33
+      ]
+    },
+    "malaria": {
+      "peak_week": 26,
+      "trough_week": 48,
+      "high_risk_weeks": [
+        5,
+        6,
+        7,
+        8,
+        10,
+        11,
+        14,
+        16,
+        18,
+        19,
+        20,
+        21,
+        25,
+        26
+      ]
+    }
+  },
+  "Dhaka": {
+    "influenza": {
+      "peak_week": 24,
+      "trough_week": 49,
+      "high_risk_weeks": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29
+      ]
+    },
+    "diarrhoea": {
+      "peak_week": 15,
+      "trough_week": 43,
+      "high_risk_weeks": [
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21
+      ]
+    },
+    "dengue": {
+      "peak_week": 21,
+      "trough_week": 52,
+      "high_risk_weeks": [
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31
+      ]
+    },
+    "malaria": {
+      "peak_week": 17,
+      "trough_week": 3,
+      "high_risk_weeks": [
+        4,
+        6,
+        11,
+        12,
+        13,
+        15,
+        17,
+        18,
+        20,
+        39
+      ]
+    }
+  },
+  "Rangpur": {
+    "influenza": {
+      "peak_week": 50,
+      "trough_week": 34,
+      "high_risk_weeks": [
+        1,
+        12,
+        13,
+        15,
+        17,
+        18,
+        48,
+        49,
+        50,
+        51,
+        52
+      ]
+    },
+    "diarrhoea": {
+      "peak_week": 12,
+      "trough_week": 39,
+      "high_risk_weeks": [
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19
+      ]
+    },
+    "dengue": {
+      "peak_week": 47,
+      "trough_week": 33,
+      "high_risk_weeks": [
+        1,
+        5,
+        6,
+        8,
+        41,
+        42,
+        43,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52
+      ]
+    },
+    "malaria": {
+      "peak_week": 9,
+      "trough_week": 52,
+      "high_risk_weeks": [
+        1,
+        6,
+        9,
+        37
+      ]
+    }
+  },
+  "Barishal": {
+    "influenza": {
+      "peak_week": 23,
+      "trough_week": 1,
+      "high_risk_weeks": [
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        29,
+        34,
+        37
+      ]
+    },
+    "diarrhoea": {
+      "peak_week": 48,
+      "trough_week": 31,
+      "high_risk_weeks": [
+        14,
+        15,
+        18,
+        19,
+        44,
+        45,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52
+      ]
+    },
+    "dengue": {
+      "peak_week": 24,
+      "trough_week": 44,
+      "high_risk_weeks": [
+        3,
+        4,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        50,
+        51,
+        52
+      ]
+    },
+    "malaria": {
+      "peak_week": 52,
+      "trough_week": 2,
+      "high_risk_weeks": [
+        10,
+        11,
+        52
+      ]
+    }
+  },
+  "Rajshahi": {
+    "influenza": {
+      "peak_week": 51,
+      "trough_week": 36,
+      "high_risk_weeks": [
+        1,
+        2,
+        3,
+        4,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        21,
+        50,
+        51,
+        52
+      ]
+    },
+    "diarrhoea": {
+      "peak_week": 52,
+      "trough_week": 34,
+      "high_risk_weeks": [
+        1,
+        2,
+        3,
+        4,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        49,
+        50,
+        51,
+        52
+      ]
+    },
+    "dengue": {
+      "peak_week": 24,
+      "trough_week": 41,
+      "high_risk_weeks": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        49,
+        50,
+        51
+      ]
+    },
+    "malaria": {
+      "peak_week": 4,
+      "trough_week": 52,
+      "high_risk_weeks": [
+        2,
+        4,
+        8,
+        28,
+        29,
+        30,
+        37
+      ]
+    }
+  },
+  "Sylhet": {
+    "influenza": {
+      "peak_week": 29,
+      "trough_week": 40,
+      "high_risk_weeks": [
+        5,
+        12,
+        15,
+        17,
+        20,
+        24,
+        25,
+        26,
+        28,
+        29,
+        31,
+        43
+      ]
+    },
+    "diarrhoea": {
+      "peak_week": 46,
+      "trough_week": 31,
+      "high_risk_weeks": [
+        11,
+        14,
+        15,
+        18,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52
+      ]
+    },
+    "dengue": {
+      "peak_week": 21,
+      "trough_week": 5,
+      "high_risk_weeks": [
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        48
+      ]
+    },
+    "malaria": {
+      "peak_week": 34,
+      "trough_week": 50,
+      "high_risk_weeks": [
+        17,
+        33,
+        34,
+        40,
+        42,
+        43,
+        45
+      ]
+    }
+  },
+  "Khulna": {
+    "influenza": {
+      "peak_week": 49,
+      "trough_week": 33,
+      "high_risk_weeks": [
+        11,
+        12,
+        13,
+        14,
+        15,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52
+      ]
+    },
+    "diarrhoea": {
+      "peak_week": 9,
+      "trough_week": 36,
+      "high_risk_weeks": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        50,
+        51,
+        52
+      ]
+    },
+    "dengue": {
+      "peak_week": 21,
+      "trough_week": 41,
+      "high_risk_weeks": [
+        11,
+        15,
+        16,
+        21,
+        22,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        32,
+        33
+      ]
+    },
+    "malaria": {
+      "peak_week": 9,
+      "trough_week": 36,
+      "high_risk_weeks": [
+        9,
+        11,
+        12,
+        15,
+        39,
+        45
+      ]
+    }
+  },
+  "Mymensingh": {
+    "influenza": {
+      "peak_week": 24,
+      "trough_week": 30,
+      "high_risk_weeks": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        38,
+        39,
+        45,
+        47,
+        49
+      ]
+    },
+    "diarrhoea": {
+      "peak_week": 50,
+      "trough_week": 32,
+      "high_risk_weeks": [
+        1,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52
+      ]
+    },
+    "dengue": {
+      "peak_week": 6,
+      "trough_week": 35,
+      "high_risk_weeks": [
+        2,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        25,
+        28,
+        29,
+        31,
+        51,
+        52
+      ]
+    },
+    "malaria": {
+      "peak_week": 25,
+      "trough_week": 3,
+      "high_risk_weeks": [
+        14,
+        21,
+        23,
+        25,
+        27,
+        28,
+        46,
+        52
+      ]
+    }
+  }
+}

@@ -1,0 +1,227 @@
+[
+  {
+    "budget_bdt": 12500000,
+    "budget_multiplier": 0.25,
+    "alpha": 0.0,
+    "status": "Optimal",
+    "total_unmet_optimal": 0,
+    "total_unmet_proportional": 0,
+    "improvement_pct": 0
+  },
+  {
+    "budget_bdt": 12500000,
+    "budget_multiplier": 0.25,
+    "alpha": 0.1,
+    "status": "Optimal",
+    "total_unmet_optimal": 0,
+    "total_unmet_proportional": 0,
+    "improvement_pct": 0
+  },
+  {
+    "budget_bdt": 12500000,
+    "budget_multiplier": 0.25,
+    "alpha": 0.2,
+    "status": "Optimal",
+    "total_unmet_optimal": 0,
+    "total_unmet_proportional": 0,
+    "improvement_pct": 0
+  },
+  {
+    "budget_bdt": 12500000,
+    "budget_multiplier": 0.25,
+    "alpha": 0.3,
+    "status": "Optimal",
+    "total_unmet_optimal": 0,
+    "total_unmet_proportional": 0,
+    "improvement_pct": 0
+  },
+  {
+    "budget_bdt": 12500000,
+    "budget_multiplier": 0.25,
+    "alpha": 0.5,
+    "status": "Optimal",
+    "total_unmet_optimal": 0,
+    "total_unmet_proportional": 0,
+    "improvement_pct": 0
+  },
+  {
+    "budget_bdt": 25000000,
+    "budget_multiplier": 0.5,
+    "alpha": 0.0,
+    "status": "Optimal",
+    "total_unmet_optimal": 0,
+    "total_unmet_proportional": 0,
+    "improvement_pct": 0
+  },
+  {
+    "budget_bdt": 25000000,
+    "budget_multiplier": 0.5,
+    "alpha": 0.1,
+    "status": "Optimal",
+    "total_unmet_optimal": 0,
+    "total_unmet_proportional": 0,
+    "improvement_pct": 0
+  },
+  {
+    "budget_bdt": 25000000,
+    "budget_multiplier": 0.5,
+    "alpha": 0.2,
+    "status": "Optimal",
+    "total_unmet_optimal": 0,
+    "total_unmet_proportional": 0,
+    "improvement_pct": 0
+  },
+  {
+    "budget_bdt": 25000000,
+    "budget_multiplier": 0.5,
+    "alpha": 0.3,
+    "status": "Optimal",
+    "total_unmet_optimal": 0,
+    "total_unmet_proportional": 0,
+    "improvement_pct": 0
+  },
+  {
+    "budget_bdt": 25000000,
+    "budget_multiplier": 0.5,
+    "alpha": 0.5,
+    "status": "Optimal",
+    "total_unmet_optimal": 0,
+    "total_unmet_proportional": 0,
+    "improvement_pct": 0
+  },
+  {
+    "budget_bdt": 37500000,
+    "budget_multiplier": 0.75,
+    "alpha": 0.0,
+    "status": "Optimal",
+    "total_unmet_optimal": 0,
+    "total_unmet_proportional": 0,
+    "improvement_pct": 0
+  },
+  {
+    "budget_bdt": 37500000,
+    "budget_multiplier": 0.75,
+    "alpha": 0.1,
+    "status": "Optimal",
+    "total_unmet_optimal": 0,
+    "total_unmet_proportional": 0,
+    "improvement_pct": 0
+  },
+  {
+    "budget_bdt": 37500000,
+    "budget_multiplier": 0.75,
+    "alpha": 0.2,
+    "status": "Optimal",
+    "total_unmet_optimal": 0,
+    "total_unmet_proportional": 0,
+    "improvement_pct": 0
+  },
+  {
+    "budget_bdt": 37500000,
+    "budget_multiplier": 0.75,
+    "alpha": 0.3,
+    "status": "Optimal",
+    "total_unmet_optimal": 0,
+    "total_unmet_proportional": 0,
+    "improvement_pct": 0
+  },
+  {
+    "budget_bdt": 37500000,
+    "budget_multiplier": 0.75,
+    "alpha": 0.5,
+    "status": "Optimal",
+    "total_unmet_optimal": 0,
+    "total_unmet_proportional": 0,
+    "improvement_pct": 0
+  },
+  {
+    "budget_bdt": 50000000,
+    "budget_multiplier": 1.0,
+    "alpha": 0.0,
+    "status": "Optimal",
+    "total_unmet_optimal": 0,
+    "total_unmet_proportional": 0,
+    "improvement_pct": 0
+  },
+  {
+    "budget_bdt": 50000000,
+    "budget_multiplier": 1.0,
+    "alpha": 0.1,
+    "status": "Optimal",
+    "total_unmet_optimal": 0,
+    "total_unmet_proportional": 0,
+    "improvement_pct": 0
+  },
+  {
+    "budget_bdt": 50000000,
+    "budget_multiplier": 1.0,
+    "alpha": 0.2,
+    "status": "Optimal",
+    "total_unmet_optimal": 0,
+    "total_unmet_proportional": 0,
+    "improvement_pct": 0
+  },
+  {
+    "budget_bdt": 50000000,
+    "budget_multiplier": 1.0,
+    "alpha": 0.3,
+    "status": "Optimal",
+    "total_unmet_optimal": 0,
+    "total_unmet_proportional": 0,
+    "improvement_pct": 0
+  },
+  {
+    "budget_bdt": 50000000,
+    "budget_multiplier": 1.0,
+    "alpha": 0.5,
+    "status": "Optimal",
+    "total_unmet_optimal": 0,
+    "total_unmet_proportional": 0,
+    "improvement_pct": 0
+  },
+  {
+    "budget_bdt": 75000000,
+    "budget_multiplier": 1.5,
+    "alpha": 0.0,
+    "status": "Optimal",
+    "total_unmet_optimal": 0,
+    "total_unmet_proportional": 0,
+    "improvement_pct": 0
+  },
+  {
+    "budget_bdt": 75000000,
+    "budget_multiplier": 1.5,
+    "alpha": 0.1,
+    "status": "Optimal",
+    "total_unmet_optimal": 0,
+    "total_unmet_proportional": 0,
+    "improvement_pct": 0
+  },
+  {
+    "budget_bdt": 75000000,
+    "budget_multiplier": 1.5,
+    "alpha": 0.2,
+    "status": "Optimal",
+    "total_unmet_optimal": 0,
+    "total_unmet_proportional": 0,
+    "improvement_pct": 0
+  },
+  {
+    "budget_bdt": 75000000,
+    "budget_multiplier": 1.5,
+    "alpha": 0.3,
+    "status": "Optimal",
+    "total_unmet_optimal": 0,
+    "total_unmet_proportional": 0,
+    "improvement_pct": 0
+  },
+  {
+    "budget_bdt": 75000000,
+    "budget_multiplier": 1.5,
+    "alpha": 0.5,
+    "status": "Optimal",
+    "total_unmet_optimal": 0,
+    "total_unmet_proportional": 0,
+    "improvement_pct": 0
+  }
+]

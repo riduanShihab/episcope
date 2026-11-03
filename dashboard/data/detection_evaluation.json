@@ -1,0 +1,11 @@
+{
+  "threshold_c2": 2.0,
+  "threshold_c3": 2.5,
+  "true_positives": 75,
+  "false_positives": 8590,
+  "false_negatives": 148,
+  "sensitivity": 0.3363,
+  "positive_predictive_value": 0.0087,
+  "median_delay_weeks": 1.0,
+  "total_outbreaks_in_gt": 35
+}

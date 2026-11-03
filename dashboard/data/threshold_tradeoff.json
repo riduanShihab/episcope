@@ -1,0 +1,58 @@
+[
+  {
+    "threshold": 0.5,
+    "sensitivity": 0.3004,
+    "specificity": 0.7243,
+    "false_alerts": 8350,
+    "total_alerts": 8417
+  },
+  {
+    "threshold": 1.0,
+    "sensitivity": 0.278,
+    "specificity": 0.7616,
+    "false_alerts": 7220,
+    "total_alerts": 7282
+  },
+  {
+    "threshold": 1.5,
+    "sensitivity": 0.2556,
+    "specificity": 0.7982,
+    "false_alerts": 6112,
+    "total_alerts": 6169
+  },
+  {
+    "threshold": 2.0,
+    "sensitivity": 0.2422,
+    "specificity": 0.8349,
+    "false_alerts": 5001,
+    "total_alerts": 5055
+  },
+  {
+    "threshold": 2.5,
+    "sensitivity": 0.2197,
+    "specificity": 0.8667,
+    "false_alerts": 4038,
+    "total_alerts": 4087
+  },
+  {
+    "threshold": 3.0,
+    "sensitivity": 0.1928,
+    "specificity": 0.895,
+    "false_alerts": 3180,
+    "total_alerts": 3223
+  },
+  {
+    "threshold": 3.5,
+    "sensitivity": 0.1704,
+    "specificity": 0.9177,
+    "false_alerts": 2492,
+    "total_alerts": 2530
+  },
+  {
+    "threshold": 4.0,
+    "sensitivity": 0.1659,
+    "specificity": 0.9357,
+    "false_alerts": 1947,
+    "total_alerts": 1984
+  }
+]
